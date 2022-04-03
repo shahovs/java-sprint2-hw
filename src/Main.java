@@ -26,13 +26,13 @@ public class Main {
         manager.createSubtask(subtask3);
         System.out.println(manager);
 
-        Task task3 = new Task("Cooking", "Soap and spaghetti", 0, Task.Status.IN_PROGRESS);
-        Task task4 = new Task("Cleaning", "Kitchen and room", 1, Task.Status.DONE);
+        Task task3 = new Task("Cooking", "Soap and spaghetti", 1, Task.Status.IN_PROGRESS);
+        Task task4 = new Task("Cleaning", "Kitchen and room", 2, Task.Status.DONE);
         manager.updateTask(task3);
         manager.updateTask(task4);
-        Epic epic3 = new Epic("Write a story", "For me and friends", 2);
+        Epic epic3 = new Epic("Write a story", "For me and friends", 3);
         manager.updateEpic(epic3);
-        Subtask subtask4 = new Subtask("Create a plot", "interesting, unusual, with funny end", 3,
+        Subtask subtask4 = new Subtask("Create a plot", "interesting, unusual, with funny end", 4,
                 Task.Status.DONE, epic3);
         manager.updateSubtask(subtask4);
         subtask3.setStatus(Task.Status.DONE);
@@ -41,9 +41,8 @@ public class Main {
 
         task3.setStatus(Task.Status.DONE);
         manager.updateTask(task3);
-        System.out.println(manager);
-        manager.removeTask(0);
-        manager.removeEpic(5);
+        manager.removeTask(1);
+        manager.removeEpic(6);
         System.out.println(manager);
 
     }

@@ -1,3 +1,4 @@
+// Ульяна, спасибо за поддержку! Это очень важно :)
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -38,11 +39,10 @@ public class Manager {
     public void removeAllSubtasks() {
         for (Epic epic : epics.values()) {
             epic.removeAllSubtasks();
+            setStatusOfEpic(epic);
         }
         subtasks.clear();
     }
-
-// IDEA пытается представить подобные методы (ниже) одной строкой. Это нормально?
 
     public Task getTask(int id) {
         return tasks.get(id);
@@ -57,22 +57,19 @@ public class Manager {
     }
 
     public void createTask(Task task) {
-        final int id = idCounter;
-        ++idCounter;
+        final int id = ++idCounter;
         task.setId(id);
         tasks.put(id, task);
     }
 
     public void createEpic(Epic epic) {
-        final int id = idCounter;
-        ++idCounter;
+        final int id = ++idCounter;
         epic.setId(id);
         epics.put(id, epic);
     }
 
     public void createSubtask(Subtask subtask) {
-        final int id = idCounter;
-        ++idCounter;
+        final int id = ++idCounter;
         subtask.setId(id);
         subtasks.put(id, subtask);
         Epic epic = subtask.getEpic();
@@ -88,9 +85,9 @@ public class Manager {
         tasks.put(id, updatedTask);
     }
 
-    public void updateEpic(Epic updatedEpic){
+    public void updateEpic(Epic updatedEpic) {
         int id = updatedEpic.getId();
-        if(!epics.containsKey(id)){
+        if (!epics.containsKey(id)) {
             return;
         }
         Epic removingEpic = epics.get(id);
@@ -103,7 +100,7 @@ public class Manager {
 
     public void updateSubtask(Subtask updatedSubtask) {
         int id = updatedSubtask.getId();
-        if (!subtasks.containsKey(id)){
+        if (!subtasks.containsKey(id)) {
             return;
         }
         removeSubtask(id);
@@ -135,6 +132,7 @@ public class Manager {
         Epic epic = subtask.getEpic();
         epic.removeSubtask(subtask); // удаляем из ArrayList класса Epic
         subtasks.remove(id); // удаляем из HashMap класса Manager
+        setStatusOfEpic(epic);
     }
 
     public ArrayList<Subtask> getSubtasksOfEpic(int id) {
@@ -144,19 +142,22 @@ public class Manager {
     @Override
     public String toString() {
         String result = "TASKS:\n" + tasks;
-        result += "\nEPICS:\n" + epics;
+        result += "\nEPICS and subtasks:";
+        for (Epic epic : epics.values()) {
+            result += "\n" + epic + "\n" + epic.getSubtasks();
+        }
         return result;
     }
 
-    private void setStatusOfEpic(Epic epic){
+    private void setStatusOfEpic(Epic epic) {
         ArrayList<Subtask> subtasksOfEpic = epic.getSubtasks();
-        if(subtasksOfEpic.size()==0){
+        if (subtasksOfEpic.size() == 0) {
             epic.setStatus(Task.Status.NEW);
             return;
         }
         Task.Status status = subtasksOfEpic.get(0).getStatus();
-        for(Subtask subtask : subtasksOfEpic){
-            if(status!=subtask.getStatus()){
+        for (Subtask subtask : subtasksOfEpic) {
+            if (status != subtask.getStatus()) {
                 epic.setStatus(Task.Status.IN_PROGRESS);
                 return;
             }
