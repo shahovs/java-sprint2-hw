@@ -1,4 +1,8 @@
-// Ульяна, спасибо за поддержку! Это очень важно :)
+package manager; // Ульяна, спасибо за поддержку! Это очень важно :)
+import model.Epic;
+import model.Subtask;
+import model.Task;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -121,17 +125,17 @@ public class Manager {
         }
         for (Subtask subtask : epic.getSubtasks()) {
             int idSubtask = subtask.getId();
-            subtasks.remove(idSubtask); // удаляем subtasks (относящихся к удаляемому epic) из HashMap класса Manager
+            subtasks.remove(idSubtask); // удаляем subtasks (относящихся к удаляемому epic) из HashMap класса manager.Manager
         }
-        epic.removeAllSubtasks(); // удаляем subtasks (относящихся к удаляемому epic) из ArrayList класса Epic
-        epics.remove(idEpic); // удаляем epic из HashMap класса Manager
+        epic.removeAllSubtasks(); // удаляем subtasks (относящихся к удаляемому epic) из ArrayList класса model.Epic
+        epics.remove(idEpic); // удаляем epic из HashMap класса manager.Manager
     }
 
     public void removeSubtask(int id) {
         Subtask subtask = subtasks.get(id);
         Epic epic = subtask.getEpic();
-        epic.removeSubtask(subtask); // удаляем из ArrayList класса Epic
-        subtasks.remove(id); // удаляем из HashMap класса Manager
+        epic.removeSubtask(subtask); // удаляем из ArrayList класса model.Epic
+        subtasks.remove(id); // удаляем из HashMap класса manager.Manager
         setStatusOfEpic(epic);
     }
 
