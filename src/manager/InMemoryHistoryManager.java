@@ -2,24 +2,24 @@ package manager;
 
 import model.Task;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
     private final int MAX_TASKS_IN_HISTORY = 10;
-    private final List<Task> history;
+    private final LinkedList<Task> history;
 
     public InMemoryHistoryManager() {
-        history = new ArrayList<>();
+        history = new LinkedList<>();
     }
 
     @Override
     public void add(Task task) {
-        history.add(task);
-        if (history.size() > MAX_TASKS_IN_HISTORY) {
-            history.remove(0);
+        if (history.size() == MAX_TASKS_IN_HISTORY) {
+            history.remove();
         }
+        history.add(task);
     }
 
     @Override

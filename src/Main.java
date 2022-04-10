@@ -63,7 +63,7 @@ public class Main {
             manager.getSubtask(i);
         }
 
-        System.out.println("\nИстория просмотров (после нового вызова задач):\n" + manager.getHistory());
+        System.out.println("\nИстория просмотров (после новых вызовов задач):\n" + manager.getHistory());
 
 
         manager.updateTask(new Task("Cooking (обновили статус)", "Soap and spaghetti", 3

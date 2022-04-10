@@ -34,10 +34,6 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(tasks.values());
     }
 
-// Можно ли в качестве возвращаемого типа ставить List, если метод возвращает ArrayList
-// или мы тем самым введем в заблуждение пользователей класса, которые могут попытаться использовать метод
-// для передачи результата в другой тип списков?
-
     @Override
     public List<Epic> getAllEpics() {
         return new ArrayList<>(epics.values());
