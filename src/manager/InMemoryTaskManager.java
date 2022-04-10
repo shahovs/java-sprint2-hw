@@ -10,25 +10,23 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final int MAX_TASKS_IN_HISTORY = 10;
-
     private int idCounter;
     private final HashMap<Integer, Task> tasks;
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, Subtask> subtasks;
-    private final List<Task> history;
+    private HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         idCounter = 0;
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
-        history = new ArrayList<>();
+        historyManager = Managers.getDefaultHistory();
     }
 
     @Override
     public List<Task> getHistory() {
-        return history;
+        return historyManager.getHistory();
     }
 
     @Override
@@ -73,30 +71,33 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id) {
         Task task = tasks.get(id);
-        addToHistory(task);
+        //addToHistory(task);
+        historyManager.add(task);
         return task;
     }
 
     @Override
     public Epic getEpic(int id) {
         Epic epic = epics.get(id);
-        addToHistory(epic);
+        //addToHistory(epic);
+        historyManager.add(epic);
         return epic;
     }
 
     @Override
     public Subtask getSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        addToHistory(subtask);
+        //addToHistory(subtask);
+        historyManager.add(subtask);
         return subtask;
     }
 
-    private void addToHistory(Task task) {
+/*    private void addToHistory(Task task) {
         history.add(task);
         if (history.size() > MAX_TASKS_IN_HISTORY) {
             history.remove(0);
         }
-    }
+    }*/
 
     @Override
     public void createTask(Task task) {

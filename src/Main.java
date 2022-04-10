@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 /**
+ *
  */
 public class Main {
     public static void main(String[] args) {
@@ -49,16 +50,16 @@ public class Main {
         System.out.println("Все задачи созданы. Вывод: \n" + manager);
         System.out.println("\nИстория просмотров (до вызова задач, пустая):\n" + manager.getHistory());
 
-        for( int i = 1; i<=9; i++){
+        for (int i = 1; i <= 9; i++) {
             manager.getTask(i);
         }
         manager.getTask(7);
         System.out.println("\nИстория просмотров (после первых десяти вызовов):\n" + manager.getHistory());
 
-        for( int i = 10; i<=11; i++){
+        for (int i = 10; i <= 11; i++) {
             manager.getEpic(i);
         }
-        for( int i = 12; i<=14; i++){
+        for (int i = 12; i <= 14; i++) {
             manager.getSubtask(i);
         }
 
