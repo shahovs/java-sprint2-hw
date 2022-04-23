@@ -45,7 +45,7 @@ public class Main {
         manager.createSubtask(subtask1);
         manager.createSubtask(subtask2);
 
-        System.out.println("\nИстория просмотров (до вызова задач, пустая):" + manager.getHistory());
+        System.out.println("\nИстория просмотров до вызова задач (пустая):" + manager.getHistory());
 
         manager.getTask(7);
         manager.getTask(7);
@@ -81,7 +81,7 @@ public class Main {
         Subtask subtask4 = new Subtask("Create a plot (обновили подзадачу)", "with funny end", 12,
                 Task.Status.DONE, epic3);
         manager.updateSubtask(subtask4);
-        System.out.println("\nИстория просмотров (после изменения задач):\n"
+        System.out.println("\nИстория просмотров после изменения задач):\n"
                 + "(задачи в истории отображаются в измененном виде)" + manager.getHistory());
 
         task3.setStatus(Task.Status.DONE);
@@ -97,6 +97,6 @@ public class Main {
         manager.removeAllTasks();
         manager.removeAllSubtasks();
         manager.removeAllEpics();
-        System.out.println("\nИстория просмотров (после удаления всех задач, пустая):" + manager.getHistory());
+        System.out.println("\nИстория просмотров после удаления всех задач (пустая):" + manager.getHistory());
     }
 }
