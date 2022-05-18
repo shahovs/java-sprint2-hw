@@ -32,9 +32,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try (final BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             reader.readLine(); // Пропустили первую строку с заголовками
             String line = reader.readLine();
-            while (line != null) { // Почему нельзя использовать метод ready() ?
+            while (line != null) {
                 if (!line.isBlank()) {
-                    parseLineAndLoad(line);
+                    try {
+                        parseLineAndLoad(line);
+                    } catch (Throwable e) {
+
+                    }
                 } else {
                     line = reader.readLine();
                     loadHistory(line);
@@ -42,74 +46,43 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            throw new ManagerSaveException(e); // Зачем бросать свое исключение?
+            throw new ManagerSaveException(e);
         }
     }
 
-    private void parseLineAndLoad(String line) {
+    private void parseLineAndLoad(String line) throws ManagerException {
         if (line.startsWith("id") || line.isBlank()) {
-            System.out.println("Ошибка. Неправильная строка.");
             return;
         }
 
         String[] elements = line.split(",");
         if (elements.length < 5) {
-            System.out.println("Ошибка. Элементов в строке недостаточно");
-            return;
+            throw new ManagerException(new Throwable());
         }
 
         int id = Integer.parseInt(elements[0]);
-        TypesOfTasks type = TypesOfTasks.valueOf(elements[1]); //System.out.println("TYPE: " + type);
+        TypesOfTasks type = TypesOfTasks.valueOf(elements[1]);
         String name = elements[2];
-        Task.Status status = Task.Status.valueOf(elements[3]); //System.out.println("STATUS: " + status);
+        Task.Status status = Task.Status.valueOf(elements[3]);
         String description = elements[4];
 
         switch (type) {
             case TASK:
-                recreateTask(new Task(name, description, id, status));
+                tasks.put(id, new Task(name, description, id, status));
                 break;
             case EPIC:
-                recreateEpic(new Epic(name, description, id));
+                epics.put(id, new Epic(name, description, id));
                 break;
             case SUBTASK:
                 if (elements.length == 6) {
-                    int idEpic = Integer.parseInt(elements[5]); //System.out.println("IDEPIC: " + idEpic);
+                    int idEpic = Integer.parseInt(elements[5]);
                     Epic epic = epics.get(idEpic);
-                    if (epic == null) {
-                        System.out.println("Ошибка. Эпик == null");
-                    }
-                    recreateSubtask(new Subtask(name, description, id, status, epic));
-                } else {
-                    System.out.println("Ошибка. У подзадачи не найден id эпика.");
+                    Subtask subtask = new Subtask(name, description, id, status, epic);
+                    subtasks.put(id, subtask);
+                    epic.addSubtask(subtask);
+                    setStatusOfEpic(epic);
                 }
-                break;
-            default:
-                System.out.println("Ошибка. Не найдет тип задачи.");
         }
-    }
-
-    private void recreateTask(Task task) {
-        final int id = task.getId();
-        tasks.put(id, task);
-        checkIdCounter(id);
-    }
-
-    private void recreateEpic(Epic epic) {
-        final int id = epic.getId();
-        epics.put(id, epic);
-        checkIdCounter(id);
-    }
-
-    private void recreateSubtask(Subtask subtask) {
-        final int id = subtask.getId();
-        subtasks.put(id, subtask);
-        Epic epic = subtask.getEpic();
-        epic.addSubtask(subtask);
-        setStatusOfEpic(epic);
-        checkIdCounter(id);
-    }
-
-    private void checkIdCounter(int id) {
         if (idCounter < id) {
             idCounter = id;
         }
@@ -128,8 +101,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 historyManager.add(epics.get(id));
             } else if (subtasks.containsKey(id)) {
                 historyManager.add(subtasks.get(id));
-            } else {
-                System.out.println("Ошибка. Не найдена задача по id.");
             }
         }
     }
@@ -151,7 +122,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             writer.write(makeHistoryString());
 
         } catch (IOException e) {
-            System.out.println("Ошибка. Не удалось создать writer или сделать запись в файл.");
             throw new ManagerSaveException(e);
         }
     }
@@ -170,7 +140,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private String makeHistoryString() {
         StringBuilder result = new StringBuilder("\n");
-        List<Task> history = historyManager.getHistory(); //System.out.println("HISTORY: " + history);
+        List<Task> history = historyManager.getHistory();
         int lastIndex = history.size() - 1;
         for (int index = 0; index < history.size(); index++) {
             result.append(history.get(index).getId());
@@ -274,6 +244,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
+    // Спасибо за поддержку, Ульяна!
+    // Как перенести тесты в класс Main пока не придумал.
+    // В тестах нужен прямой доступ к мапам tasks, epics и subtasks.
+    // (иначе если использовать геттеры, то тесты начнут сами менять историю прямо по ходу проверки)
+
     // Тесты
     public static void main(String[] args) {
         System.out.println("Пришло время практики!");
@@ -339,18 +314,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         List<Task> history = historyManager.getHistory();
         List<Task> historyFromFile = managerFromFile.historyManager.getHistory();
-        if (history.equals(historyFromFile)) {
-            System.out.println("Истории сопадают.");
-        } else {
-            System.out.println("Ошибка. Истории не совпадают.");
+        if (!history.equals(historyFromFile)) {
+            System.out.println("Истории не совпадают. Тест не пройден.");
         }
     }
 
     private void compare(Task task, Task taskFromFile) {
-        if (task.equals(taskFromFile)) {
-            System.out.println("TRUE: " + task.getName() + " equals " + taskFromFile.getName());
-        } else {
-            System.out.println("Ошибка. Задачи не равны");
+        if (!task.equals(taskFromFile)) {
+            System.out.println("Задачи не равны. Тест не пройден.");
         }
     }
 
