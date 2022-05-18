@@ -10,11 +10,11 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private int idCounter;
-    private final HashMap<Integer, Task> tasks;
-    private final HashMap<Integer, Epic> epics;
-    private final HashMap<Integer, Subtask> subtasks;
-    private HistoryManager historyManager;
+    protected int idCounter;
+    protected final HashMap<Integer, Task> tasks;
+    protected final HashMap<Integer, Epic> epics;
+    protected final HashMap<Integer, Subtask> subtasks;
+    protected HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         idCounter = 0;
@@ -212,7 +212,7 @@ public class InMemoryTaskManager implements TaskManager {
         return result;
     }
 
-    private void setStatusOfEpic(Epic epic) {
+    protected void setStatusOfEpic(Epic epic) {
         if (epic == null) {
             return;
         }

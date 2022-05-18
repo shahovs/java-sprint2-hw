@@ -10,6 +10,10 @@ public class Epic extends Task {
         subtasks = new ArrayList<>();
     }
 
+    public Epic(String name, String description) {
+        this(name, description, 0);
+    }
+
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
     }
@@ -28,5 +32,10 @@ public class Epic extends Task {
 
     public void updateSubtasks(ArrayList<Subtask> updatedSubtasks) {
         subtasks = updatedSubtasks;
+    }
+
+    @Override
+    public TypesOfTasks getType() {
+        return TypesOfTasks.EPIC;
     }
 }

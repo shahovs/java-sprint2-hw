@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class Task {
     private String name;
     private String description;
@@ -18,6 +20,10 @@ public class Task {
         this.description = description;
         this.id = id;
         this.status = status;
+    }
+
+    public Task(String name, String description) {
+        this(name, description, 0, Status.NEW);
     }
 
     public int getId() {
@@ -52,9 +58,46 @@ public class Task {
         this.description = description;
     }
 
+    public TypesOfTasks getType() {
+        return TypesOfTasks.TASK;
+    }
+
     @Override
     public String toString() {
         String result = "\nId " + id + " Name: '" + name + "' Description: '" + description + "' Status: " + status;
         return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Task task = (Task) obj;
+        return Objects.equals(name, task.name) && Objects.equals(description, task.description)
+                && id == task.id && Objects.equals(status, task.status);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
