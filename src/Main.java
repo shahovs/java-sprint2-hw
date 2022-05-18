@@ -1,8 +1,6 @@
 // Все тесты перенесены в метод main() класса FileBackedTasksManager (как и предлагают в задании)
 
 
-
-
 //import manager.FileBackedTasksManager;
 //import manager.TaskManager;
 //import manager.Managers;
@@ -15,8 +13,11 @@
 ///**
 // *
 // */
-//public class Main {
-//    public static void main(String[] args) {
+public class Main {
+    public static void main(String[] args) {
+    }
+}
+
 //        System.out.println("Пришло время практики!");
 //        TaskManager manager = Managers.getDefault(); // Менеджер без загрузки начальных данных.
 //
