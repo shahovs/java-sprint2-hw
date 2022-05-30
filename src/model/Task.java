@@ -1,61 +1,102 @@
 package model;
 
 import java.util.Objects;
+import java.time.LocalDateTime;
 
 public class Task {
     private String name;
     private String description;
     private int id;
+    private Status status;
+    private LocalDateTime startTime;
+    private int duration;
+    LocalDateTime finishTime;
 
     public enum Status {
-        NEW,
-        DONE,
-        IN_PROGRESS
+        NEW, DONE, IN_PROGRESS
     }
 
-    private Status status;
-
-    public Task(String name, String description, int id, Status status) {
+    public Task(String name, String description, int id, Status status, LocalDateTime startTime, int duration) {
         this.name = name;
         this.description = description;
         this.id = id;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+        this.finishTime = (startTime != null) ? startTime.plusMinutes(duration) : null;
     }
 
     public Task(String name, String description) {
         this(name, description, 0, Status.NEW);
     }
 
-    public int getId() {
-        return id;
+    public Task(String name, String description, int id, Status status) {
+        this(name, description, id, status, null, 0);
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
+    private LocalDateTime getEndTime(LocalDateTime startTime, int duration) {
+        return startTime.plusMinutes(duration);
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public LocalDateTime getFinishTime() {
+        return finishTime;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+        calculateFinishTime();
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+        calculateFinishTime();
+    }
+
+    void calculateFinishTime() {
+        if (startTime == null) {
+            return;
+        }
+        finishTime = startTime.plusMinutes(duration);
     }
 
     public TypesOfTasks getType() {
@@ -77,27 +118,6 @@ public class Task {
             return false;
         }
         Task task = (Task) obj;
-        return Objects.equals(name, task.name) && Objects.equals(description, task.description)
-                && id == task.id && Objects.equals(status, task.status);
+        return Objects.equals(name, task.name) && Objects.equals(description, task.description) && id == task.id && Objects.equals(status, task.status);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
