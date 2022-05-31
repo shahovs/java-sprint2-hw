@@ -7,9 +7,9 @@ public class Task {
     private String name;
     private String description;
     private int id;
-    private Status status;
-    private LocalDateTime startTime;
-    private int duration;
+    Status status;
+    LocalDateTime startTime;
+    int duration;
     LocalDateTime finishTime;
 
     public enum Status {
@@ -92,7 +92,7 @@ public class Task {
         calculateFinishTime();
     }
 
-    void calculateFinishTime() {
+    private void calculateFinishTime() {
         if (startTime == null) {
             return;
         }
@@ -120,4 +120,10 @@ public class Task {
         Task task = (Task) obj;
         return Objects.equals(name, task.name) && Objects.equals(description, task.description) && id == task.id && Objects.equals(status, task.status);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, id, status);
+    }
+
 }

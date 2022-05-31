@@ -32,4 +32,16 @@ public class Subtask extends Task {
         return TypesOfTasks.SUBTASK;
     }
 
+    @Override
+    public void setStartTime(LocalDateTime startTime) {
+        super.setStartTime(startTime);
+        epic.setStartTime(startTime);
+    }
+
+    @Override
+    public void setDuration(int duration) {
+        super.setDuration(duration);
+        epic.setDuration(duration);
+    }
+
 }

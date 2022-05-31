@@ -21,14 +21,19 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
+        setStartTimeAndDuration();
     }
 
     public void removeAllSubtasks() {
         subtasks.clear();
+        startTime = null;
+        duration = 0;
+        finishTime = null;
     }
 
     public void removeSubtask(Subtask subtask) {
         subtasks.remove(subtask);
+        setStartTimeAndDuration();
     }
 
     public void updateSubtasks(ArrayList<Subtask> updatedSubtasks) {
@@ -40,29 +45,48 @@ public class Epic extends Task {
         return TypesOfTasks.EPIC;
     }
 
-    public void setTimesAndDuration() {
-        calculateAndSetStartTime();
-        calculateAndSetDuration();
-        calculateAndSetFinishTime();
+    public void setStartTimeAndDuration() {
+        setStartTime(startTime);
+        setDuration(duration);
     }
 
-    private void calculateAndSetStartTime() {
+    /* Привет Ульяна!
+    * Спасибо!
+    * Долго прикидывал разные варианты, как лучше организовать методы.
+    * В итоге получилось то, что есть сейчас.
+    * Больше всего не хотелось убирать модификаторы private из полей класса-родителя (task).
+    * Но по-другому не придумал. Да и наставник в своем коде тоже давал пакетный доступ к полям.
+    * Хорошего дня!
+    * */
+
+    @Override
+    public void setStartTime(LocalDateTime st) {
         if (subtasks.size() == 0 || subtasks == null) {
-            setStartTime(null);
+            startTime = null;
             return;
         }
 
         LocalDateTime earliestTime = subtasks.get(0).getStartTime();
-
         for (Subtask subtask : subtasks) {
             if (subtask.getStartTime() != null && earliestTime.isAfter(subtask.getStartTime())) {
                 earliestTime = subtask.getStartTime();
             }
         }
-        setStartTime(earliestTime);
+        startTime = earliestTime;
+        calculateFinishTime();
     }
 
-    private void calculateAndSetFinishTime() {
+    @Override
+    public void setDuration(int d) {
+        int count = 0;
+        for (Subtask subtask : subtasks) {
+            count += subtask.getDuration();
+        }
+        duration = count;
+        calculateFinishTime();
+    }
+
+    private void calculateFinishTime() {
         if (subtasks.size() == 0 || subtasks == null) {
             finishTime = null;
             return;
@@ -76,24 +100,19 @@ public class Epic extends Task {
         finishTime = latestTime;
     }
 
-    private void calculateAndSetDuration() {
-        int count = 0;
-        for (Subtask subtask : subtasks) {
-            count += subtask.getDuration();
+    public void setStatusOfEpic() {
+        if (subtasks == null || subtasks.size() == 0) {
+            status = Task.Status.NEW;
+            return;
         }
-        setDuration(count);
+        Task.Status st = subtasks.get(0).getStatus();
+        status = st;
+        for (Subtask subtask : subtasks) {
+            if (status != subtask.getStatus()) {
+                status = Task.Status.IN_PROGRESS;
+                return;
+            }
+        }
     }
-
-//
-//    @Override
-//    public void setDuration(int duration) {
-//        this.duration = duration;
-//        setFinishTime();
-//    }
-//
-//    @Override
-//    void setFinishTime() {
-//
-//    }
 
 }

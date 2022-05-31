@@ -186,7 +186,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         InMemoryTaskManager managerMemory = new InMemoryTaskManager();
         Epic epic1 = new Epic("epicName", "d", 0);
         managerMemory.createEpic(epic1);
-        managerMemory.setStatusOfEpic(epic1);
+        epic1.setStatusOfEpic();
         assertEquals(Task.Status.NEW, epic1.getStatus(), "");
     }
 
@@ -197,7 +197,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         managerMemory.createEpic(epic1);
         managerMemory.createSubtask(new Subtask("subtaskName1", "d", 0, Task.Status.NEW, epic1));
         managerMemory.createSubtask(new Subtask("subtaskName2", "d", 0, Task.Status.NEW, epic1));
-        managerMemory.setStatusOfEpic(epic1);
+        epic1.setStatusOfEpic();
         assertEquals(Task.Status.NEW, epic1.getStatus(), "");
     }
 
@@ -208,7 +208,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         managerMemory.createEpic(epic1);
         managerMemory.createSubtask(new Subtask("subtaskName1", "d", 0, Task.Status.NEW, epic1));
         managerMemory.createSubtask(new Subtask("subtaskName2", "d", 0, Task.Status.DONE, epic1));
-        managerMemory.setStatusOfEpic(epic1);
+        epic1.setStatusOfEpic();
         assertEquals(Task.Status.IN_PROGRESS, epic1.getStatus(), "");
     }
 
@@ -219,7 +219,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         managerMemory.createEpic(epic1);
         managerMemory.createSubtask(new Subtask("subtaskName1", "d", 0, Task.Status.IN_PROGRESS, epic1));
         managerMemory.createSubtask(new Subtask("subtaskName2", "d", 0, Task.Status.IN_PROGRESS, epic1));
-        managerMemory.setStatusOfEpic(epic1);
+        epic1.setStatusOfEpic();
         assertEquals(Task.Status.IN_PROGRESS, epic1.getStatus(), "");
     }
 
@@ -230,7 +230,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         managerMemory.createEpic(epic1);
         managerMemory.createSubtask(new Subtask("subtaskName1", "d", 0, Task.Status.DONE, epic1));
         managerMemory.createSubtask(new Subtask("subtaskName2", "d", 0, Task.Status.DONE, epic1));
-        managerMemory.setStatusOfEpic(epic1);
+        epic1.setStatusOfEpic();
         assertEquals(Task.Status.DONE, epic1.getStatus(), "");
     }
 }

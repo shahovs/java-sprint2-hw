@@ -86,8 +86,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         for (Epic epic : epics.values()) {
             epic.removeAllSubtasks();
-            epic.setTimesAndDuration();
-            setStatusOfEpic(epic);
+            epic.setStatusOfEpic();
         }
         subtasks.clear();
     }
@@ -122,7 +121,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createTask(Task task) {
         if (!checkTimeAvailable(task)) {
-            System.out.println("Извините. Время для выполнения задачи уже занято. Новая задача не будет создана.");
             return;
         }
         final int id = ++idCounter;
@@ -141,7 +139,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createSubtask(Subtask subtask) {
         if (!checkTimeAvailable(subtask)) {
-            System.out.println("Извините. Время для выполнения задачи уже занято. Новая задача не будет создана.");
             return;
         }
         final int id = ++idCounter;
@@ -149,8 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(id, subtask);
         Epic epic = subtask.getEpic();
         epic.addSubtask(subtask);
-        epic.setTimesAndDuration();
-        setStatusOfEpic(epic);
+        epic.setStatusOfEpic();
         prioritizedTasks.add(subtask);
     }
 
@@ -169,7 +165,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task previous = null;
         for (Task nextTask : prioritizedTasks) {
             // Если задачи со временем закончились и начались задачи без времени, то цикл завершаем
-            // (наша задача оказалась последней)
+            // (наша задача оказалась последней либо все задачи были без времени)
             if (nextTask.getStartTime() == null) {
                 break;
             }
@@ -191,6 +187,10 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
             previous = nextTask;
+        }
+        // Если все задачи были без времени, то true
+        if (previous == null) {
+            return true;
         }
         // Если наша задача оказалась последней, то проверяем, что предыдущая задача заказчивается до начала нашей
         if (startTime.isAfter(previous.getFinishTime())) {
@@ -265,8 +265,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
-        epic.setTimesAndDuration();
-        setStatusOfEpic(epic);
+        epic.setStatusOfEpic();
     }
 
     @Override
@@ -306,41 +305,18 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         epic.removeSubtask(subtask); // удаляем из ArrayList класса model.Epic
-        epic.setTimesAndDuration();
-        setStatusOfEpic(epic);
+        epic.setStatusOfEpic();
         historyManager.remove(id);
     }
 
     @Override
     public String toString() {
         String result = "TASKS:" + tasks.values();
-        //result += "\n\nEPICS and subtasks:";
         for (Epic epic : epics.values()) {
             result += "\nEpic:" + epic + "\nEpic's subtasks:" + epic.getSubtasks();
         }
         return result;
     }
 
-    protected void setStatusOfEpic(Epic epic) {
-        if (epic == null) {
-            return;
-        }
-        ArrayList<Subtask> subtasksOfEpic = epic.getSubtasks();
-        if (subtasksOfEpic == null) {
-            return;
-        }
-        if (subtasksOfEpic.size() == 0) {
-            epic.setStatus(Task.Status.NEW);
-            return;
-        }
-        Task.Status status = subtasksOfEpic.get(0).getStatus();
-        epic.setStatus(status);
-        for (Subtask subtask : subtasksOfEpic) {
-            if (status != subtask.getStatus()) {
-                epic.setStatus(Task.Status.IN_PROGRESS);
-                return;
-            }
-        }
-    }
 }
 

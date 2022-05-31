@@ -74,7 +74,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Task.Status status = Task.Status.valueOf(elements[3]);
         String description = elements[4];
         LocalDateTime startTime = null;
-        if (!STRING_IF_DATE_TIME_NULL.equals(elements[5]))  {
+        if (!STRING_IF_DATE_TIME_NULL.equals(elements[5])) {
             startTime = LocalDateTime.parse(elements[5], formatter);
         }
         int duration = Integer.parseInt(elements[6]);
@@ -84,7 +84,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task t = new Task(name, description, id, status, startTime, duration);
                 tasks.put(id, t);
                 prioritizedTasks.add(t);
-            break;
+                break;
             case EPIC:
                 epics.put(id, new Epic(name, description, id));
                 break;
@@ -96,8 +96,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     subtasks.put(id, subtask);
                     prioritizedTasks.add(subtask);
                     epic.addSubtask(subtask);
-                    epic.setTimesAndDuration();
-                    setStatusOfEpic(epic);
+                    epic.setStatusOfEpic();
                 }
         }
         if (idCounter < id) {
