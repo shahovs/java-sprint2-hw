@@ -21,7 +21,7 @@ public class Epic extends Task {
 
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
-        setStartTimeAndDuration();
+        setStartTimeDurationAndCalculateFinish(null, 0);
     }
 
     public void removeAllSubtasks() {
@@ -33,7 +33,7 @@ public class Epic extends Task {
 
     public void removeSubtask(Subtask subtask) {
         subtasks.remove(subtask);
-        setStartTimeAndDuration();
+        setStartTimeDurationAndCalculateFinish(null, 0);
     }
 
     public void updateSubtasks(ArrayList<Subtask> updatedSubtasks) {
@@ -45,24 +45,10 @@ public class Epic extends Task {
         return TypesOfTasks.EPIC;
     }
 
-    public void setStartTimeAndDuration() {
-        setStartTime(startTime);
-        setDuration(duration);
-    }
-
-    /* Привет Ульяна!
-    * Спасибо!
-    * Долго прикидывал разные варианты, как лучше организовать методы.
-    * В итоге получилось то, что есть сейчас.
-    * Больше всего не хотелось убирать модификаторы private из полей класса-родителя (task).
-    * Но по-другому не придумал. Да и наставник в своем коде тоже давал пакетный доступ к полям.
-    * Хорошего дня!
-    * */
-
     @Override
-    public void setStartTime(LocalDateTime st) {
-        if (subtasks.size() == 0 || subtasks == null) {
-            startTime = null;
+    void setStartTimeOnly(LocalDateTime startTime) { // Аргумент не используется
+        if (subtasks == null || subtasks.size() == 0) {
+            this.startTime = null;
             return;
         }
 
@@ -72,25 +58,25 @@ public class Epic extends Task {
                 earliestTime = subtask.getStartTime();
             }
         }
-        startTime = earliestTime;
-        calculateFinishTime();
+        this.startTime = earliestTime;
     }
 
     @Override
-    public void setDuration(int d) {
+    void setDurationOnly(int duration) {  // Аргумент не используется
         int count = 0;
         for (Subtask subtask : subtasks) {
             count += subtask.getDuration();
         }
-        duration = count;
-        calculateFinishTime();
+        this.duration = count;
     }
 
-    private void calculateFinishTime() {
-        if (subtasks.size() == 0 || subtasks == null) {
+    @Override
+    void calculateFinishTime() {
+        if (subtasks == null || subtasks.size() == 0) {
             finishTime = null;
             return;
         }
+
         LocalDateTime latestTime = subtasks.get(0).getFinishTime();
         for (Subtask subtask : subtasks) {
             if (subtask.getFinishTime() != null && latestTime.isBefore(subtask.getFinishTime())) {

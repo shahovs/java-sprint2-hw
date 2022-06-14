@@ -1,11 +1,19 @@
 package manager;
 
+import main.Main;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+    @BeforeAll
+    static void checkMain() {
+        Main.main(null); // Запускаем тесты из Main.main(), чтобы не пропадали зря ))
+    }
+
     @BeforeEach
     void initInMemoryTaskManager() {
         manager = new InMemoryTaskManager();

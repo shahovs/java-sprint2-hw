@@ -82,17 +82,31 @@ public class Task {
         this.status = status;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTimeDurationAndCalculateFinish(LocalDateTime startTime, int duration) {
+        setStartTimeOnly(startTime);
+        setDurationOnly(duration);
+        calculateFinishTime();
+    }
+
+    public void setStartTimeAndCalculateFinish(LocalDateTime startTime) {
+        setStartTimeOnly(startTime);
+        calculateFinishTime();
+    }
+
+    public void setDurationAndCalculateFinish(int duration) {
+        setDurationOnly(duration);
+        calculateFinishTime();
+    }
+
+    void setStartTimeOnly(LocalDateTime startTime) {
         this.startTime = startTime;
-        calculateFinishTime();
     }
 
-    public void setDuration(int duration) {
+    void setDurationOnly(int duration) {
         this.duration = duration;
-        calculateFinishTime();
     }
 
-    private void calculateFinishTime() {
+    void calculateFinishTime() {
         if (startTime == null) {
             return;
         }

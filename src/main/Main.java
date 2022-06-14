@@ -1,4 +1,6 @@
 // Тесты
+package main;
+
 import model.*;
 import manager.*;
 
@@ -73,7 +75,7 @@ public class Main {
             System.out.println(task.getStartTime() + " " + task.getDuration() + " " + task.getName());
         }
 
-
+        System.out.println("Метод Main.main() завершен!");
 
     } // end of main()
 

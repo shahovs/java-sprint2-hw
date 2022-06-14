@@ -32,6 +32,7 @@ public class InMemoryTaskManager implements TaskManager {
         );
     }
 
+    @Override
     public TreeSet<Task> getPrioritizedTasks() {
         return prioritizedTasks;
     }
@@ -213,8 +214,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         prioritizedTasks.remove(task);
         if (checkTimeAvailable(updatedTask)) {
-            task.setStartTime(updatedTask.getStartTime());
-            task.setDuration(updatedTask.getDuration());
+            task.setStartTimeDurationAndCalculateFinish(updatedTask.getStartTime(), updatedTask.getDuration());
         } else {
             System.out.println("Извините. Новое время для выполнения задачи уже занято. " +
                     "Время выполнения задачи обновлено не будет.");
@@ -253,8 +253,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         prioritizedTasks.remove(subtask);
         if (checkTimeAvailable(updatedSubtask)) {
-            subtask.setStartTime(updatedSubtask.getStartTime());
-            subtask.setDuration(updatedSubtask.getDuration());
+            subtask.setStartTimeDurationAndCalculateFinish(updatedSubtask.getStartTime(), updatedSubtask.getDuration());
         } else {
             System.out.println("Извините. Новое время для выполнения подзадачи уже занято. " +
                     "Время выполнения подзадачи обновлено не будет.");

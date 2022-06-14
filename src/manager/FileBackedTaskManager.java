@@ -1,5 +1,7 @@
 package manager;
 
+import exception.ManagerException;
+import exception.ManagerSaveException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -21,12 +23,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final File file;
 
-    public FileBackedTaskManager(File file) {
-        this(file, false);
-    }
-
     public FileBackedTaskManager(String path) {
         this(new File(path));
+    }
+
+    public FileBackedTaskManager(File file) {
+        this(file, false);
     }
 
     public FileBackedTaskManager(File file, boolean isFile) {

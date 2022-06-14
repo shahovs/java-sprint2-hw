@@ -33,15 +33,21 @@ public class Subtask extends Task {
     }
 
     @Override
-    public void setStartTime(LocalDateTime startTime) {
-        super.setStartTime(startTime);
-        epic.setStartTime(startTime);
+    public void setStartTimeDurationAndCalculateFinish(LocalDateTime startTime, int duration) {
+        super.setStartTimeDurationAndCalculateFinish(startTime, duration);
+        epic.setStartTimeDurationAndCalculateFinish(null, 0);
     }
 
     @Override
-    public void setDuration(int duration) {
-        super.setDuration(duration);
-        epic.setDuration(duration);
+    public void setStartTimeAndCalculateFinish(LocalDateTime startTime) {
+        super.setStartTimeAndCalculateFinish(startTime);
+        epic.setStartTimeAndCalculateFinish(null);
+    }
+
+    @Override
+    public void setDurationAndCalculateFinish(int duration) {
+        super.setDurationAndCalculateFinish(duration);
+        epic.setDurationAndCalculateFinish(0);
     }
 
 }
