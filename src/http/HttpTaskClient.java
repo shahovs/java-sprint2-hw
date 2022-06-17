@@ -11,9 +11,9 @@ import java.net.http.HttpResponse;
 public class HttpTaskClient {
     public static void main(String[] args) {
         HttpTaskServer httpTaskServer = new HttpTaskServer();
-        httpTaskServer.runServer();
+        //httpTaskServer.runServer();
         HttpClient client = HttpClient.newHttpClient();
-        URI uri = URI.create(HttpTaskServer.uriSubtask);
+        URI uri = URI.create("http://localhost:" + HttpTaskServer.pathSubtask);
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)

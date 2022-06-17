@@ -202,6 +202,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task updatedTask) {
+        if (updatedTask == null) {
+            return;
+        }
         final int id = updatedTask.getId();
         if (!tasks.containsKey(id)) {
             return;
@@ -224,6 +227,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateEpic(Epic updatedEpic) {
+        if (updatedEpic == null) {
+            return;
+        }
         final int id = updatedEpic.getId();
         Epic oldEpic = epics.get(id);
         if (oldEpic == null) {
@@ -235,6 +241,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask updatedSubtask) {
+        if (updatedSubtask == null) {
+            return;
+        }
         if (!checkTimeAvailable(updatedSubtask)) {
             System.out.println("Извините. Время для выполнения задачи уже занято. Новая задача не будет создана.");
             return;

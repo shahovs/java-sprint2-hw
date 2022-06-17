@@ -6,23 +6,38 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import com.google.gson.Gson;
-
+import com.google.gson.GsonBuilder;
 
 class HttpTaskServerTest {
+    final static String uriStart = "http://localhost:" + HttpTaskServer.PORT;
+    final static String uriHeadOnly = uriStart + HttpTaskServer.pathBeginOnly;
+    final static String uriTask = uriStart + HttpTaskServer.pathTask;
+    final static String uriSubtask = uriStart + HttpTaskServer.pathSubtask;
+    final static String uriEpic = uriStart + HttpTaskServer.pathEpic;
+    final static String uriHistory = uriStart + HttpTaskServer.pathHistory;
+    final static String uriPrioritized = uriStart + HttpTaskServer.pathPrioritized;
+
     static HttpTaskServer httpTaskServer;
+    static Gson gson;
     HttpClient client;
 
     @BeforeAll
     static void createAndRunHttpTaskServer() {
         httpTaskServer = new HttpTaskServer();
-        httpTaskServer.runServer();
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
+        //httpTaskServer.runServer();
         //new HttpTaskServer().runServer();
     }
 
@@ -42,17 +57,32 @@ class HttpTaskServerTest {
 
     @Test
     void getAllTasks() {
-        createAndSendGetRequestAndCheckResponse(HttpTaskServer.uriHeadOnly, "getAllTasks");
+        createAndSendGetRequestAndCheckResponse(uriHeadOnly, "getAllTasks");
     }
 
     @Test
     void getPrioritizedTasks() {
-        createAndSendGetRequestAndCheckResponse(HttpTaskServer.uriPrioritized, "getPrioritizedTasks");
+        createAndSendGetRequestAndCheckResponse(uriPrioritized, "getPrioritizedTasks");
     }
 
     @Test
     void getHistory() {
-        createAndSendGetRequestAndCheckResponse(HttpTaskServer.uriHistory, "getHistory");
+        createAndSendGetRequestAndCheckResponse(uriHistory, "getHistory");
+    }
+
+    @Test
+    void getAllTasksWithError() {
+        createAndSendWrongMethodDelete(uriHeadOnly, "getAllTasks");
+    }
+
+    @Test
+    void getPrioritizedTasksWithError() {
+        createAndSendWrongMethodDelete(uriPrioritized, "getPrioritizedTasks");
+    }
+
+    @Test
+    void getHistoryWithError() {
+        createAndSendWrongMethodDelete(uriHistory, "getHistory");
     }
 
     private void createAndSendGetRequestAndCheckResponse(String path, String methodName) {
@@ -67,9 +97,21 @@ class HttpTaskServerTest {
         }
     }
 
+    private void createAndSendWrongMethodDelete(String path, String methodName) {
+        URI uri = URI.create(path);
+        HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            assertEquals("", response.body(), "Тело ответа на ошибочный запрос не равно пустой строке");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     void getTaskById() {
-        URI uri = URI.create(HttpTaskServer.uriTask + "?id=1");
+        URI uri = URI.create(uriTask + "/?id=1");
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -83,34 +125,60 @@ class HttpTaskServerTest {
 
     @Test
     void postTaskWithDataTime() {
-        URI uri = URI.create(HttpTaskServer.uriTask);
-        Gson gson = new Gson();
-        String json = gson.toJson(new Task("nameTask", "description", 0, Task.Status.NEW,
-                LocalDateTime.of(2022, 1, 1, 1, 1, 1), 1));
+        URI uri = URI.create(uriTask);
+        String json = gson.toJson(new Task("nameTask", "withDataTime", 0, Task.Status.DONE,
+                LocalDateTime.of(2022, 12, 31, 23, 59, 0), 50));
         System.out.println("json(new Task):\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build();
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
             assertEquals(200, response.statusCode(), "Код ответа не равен 200");
-            System.out.println("Тело ответа(postTask):\n" + response.body());
+            //System.out.println("response.statusCode()=" + response.statusCode());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     @Test
+    void deleteTaskById() {
+        URI uri = URI.create(uriTask + "/?id=1");
+        HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri)
+                .header("Accept", "application/json").build();
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void postTaskWithoutDataTime() {
+        URI uri = URI.create(uriTask);
+        String json = gson.toJson(new Task("nameTask", "withoutDataTime"));
+        System.out.println("json(new Task):\n" + json);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build(); // .header(...)
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
+        } catch (IOException |
+                InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     void postSubtaskWithoutDataTime() {
-        URI uri = URI.create(HttpTaskServer.uriSubtask);
-        Gson gson = new Gson();
+        URI uri = URI.create(uriSubtask);
         String json = gson.toJson(new Task("nameSubtask", "description"));
         System.out.println("json(new Subtask):\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build(); // .header(...)
         try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
             assertEquals(200, response.statusCode(), "Код ответа не равен 200");
-            System.out.println("Тело ответа(postSubtask):\n" + response.body());
         } catch (IOException |
                 InterruptedException e) {
             e.printStackTrace();
