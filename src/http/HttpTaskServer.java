@@ -6,6 +6,7 @@ package http;
 // - все протестировать
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 
 import com.google.gson.*;
 
@@ -20,12 +21,9 @@ import model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-//import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.net.URI;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -78,7 +76,7 @@ public class HttpTaskServer {
                 return;
             }
             try {
-                System.out.println("RequestURI: " + httpExchange.getRequestURI());
+                System.out.println("tasksHandler.handle() RequestURI: " + httpExchange.getRequestURI());
 
                 httpExchange.sendResponseHeaders(200, 0);
                 List<Task> allTasks = manager.getAllTasks();
@@ -101,7 +99,7 @@ public class HttpTaskServer {
             return;
         }
         try {
-            System.out.println("RequestURI: " + httpExchange.getRequestURI());
+            System.out.println("prioritizedHandle() RequestURI: " + httpExchange.getRequestURI());
 
             httpExchange.sendResponseHeaders(200, 0);
             TreeSet<Task> prioritizedTasks = manager.getPrioritizedTasks();
@@ -121,7 +119,7 @@ public class HttpTaskServer {
             return;
         }
         try {
-            System.out.println("RequestURI: " + httpExchange.getRequestURI());
+            System.out.println("historyHandle() RequestURI: " + httpExchange.getRequestURI());
 
             httpExchange.sendResponseHeaders(200, 0);
             List<Task> history = manager.getHistory();
@@ -136,7 +134,7 @@ public class HttpTaskServer {
     // path: "/tasks/task/" or "/tasks/task/?id=.."
     private void taskHandle(HttpExchange httpExchange) throws IOException {
         try {
-            System.out.println("RequestURI: " + httpExchange.getRequestURI());
+            System.out.println("taskHandle() RequestURI: " + httpExchange.getRequestURI());
 
             String method = httpExchange.getRequestMethod();
             boolean hasIdQuery = checkIdQuery(httpExchange);
@@ -153,14 +151,15 @@ public class HttpTaskServer {
                 // path: "/tasks/task/?id=.."
                 int id = getId(httpExchange);
                 if (id < 0) {
+                    httpExchange.sendResponseHeaders(404, 0);
                     return;
                 }
                 switch (method) {
                     case "GET":
-                        httpExchange.sendResponseHeaders(200, 0);
                         Task task = manager.getTask(id);
                         String json = gson.toJson(task);
                         System.out.println("getTask(id) json\n" + json);
+                        httpExchange.sendResponseHeaders(200, 0);
                         sendBodyAndClose(httpExchange, json);
                         break;
                     case "DELETE":
@@ -171,14 +170,13 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(404, 0);
                 }
             } else {
-                // if uri has NO id
-                // path: "/tasks/task"
+                // if uri has NO id (path: "/tasks/task")
                 switch (method) {
                     case "GET":
-                        httpExchange.sendResponseHeaders(200, 0);
                         List<Task> allTasks = manager.getAllTasks();
                         String json = gson.toJson(allTasks);
                         System.out.println("getAllTasks() json\n" + json); // удалить после окончания разработки
+                        httpExchange.sendResponseHeaders(200, 0);
                         sendBodyAndClose(httpExchange, json);
                         break;
                     case "DELETE":
@@ -225,15 +223,15 @@ public class HttpTaskServer {
     private int getId(HttpExchange httpExchange) throws IOException {
         URI uri = httpExchange.getRequestURI();
         String queryComponent = uri.getQuery(); // "id=1" or null
+//        System.out.println("getQuery(): " + queryComponent);
+//        System.out.println("getRawQuery(): " + uri.getRawQuery());
         int id = -1;
         if (queryComponent != null && queryComponent.startsWith(idAttribute)) {
             String idString = queryComponent.substring(idAttribute.length());
             try {
                 id = Integer.parseInt(idString); //System.out.println("id=" + id);
             } catch (NumberFormatException e) {
-                send404AndClose(httpExchange);
-                e.printStackTrace();
-                return -1;
+                System.out.println(e);
             }
         }
         return id;
@@ -293,9 +291,11 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private void sendBodyAndClose(HttpExchange httpExchange, String responseBody) throws IOException {
+    private void sendBodyAndClose(HttpExchange httpExchange, String responseBody) {
         try (OutputStream os = httpExchange.getResponseBody();) {
-            os.write(responseBody.getBytes());
+            byte[] responseBytes = responseBody.getBytes();
+            os.write(responseBytes);
+            //os.write(responseBody.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -304,7 +304,7 @@ public class HttpTaskServer {
     }
 
 
-//     Метод не работает. Как остановить сервер?
+//     Метод stopServer() не работает. Как остановить сервер?
 //     (тесты умеют останавливать сервер сами, а вызовы из обычных классов - нет)
 //    public void stopServer() {
 //        System.out.println("Останавливаем сервер");

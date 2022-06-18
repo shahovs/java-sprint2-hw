@@ -1,5 +1,6 @@
 package http;
-//TODO Этот класс нужно удалить. Он должен быть в тестах.
+//TODO Этот класс можно удалить.
+// Он пригодился для запуска серверов, чтобы использовать Insomnia
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -9,19 +10,25 @@ import java.net.http.HttpResponse;
 
 
 public class HttpTaskClient {
+    static HttpClient client = HttpClient.newHttpClient();
+
     public static void main(String[] args) {
-        HttpTaskServer httpTaskServer = new HttpTaskServer();
-        //httpTaskServer.runServer();
-        HttpClient client = HttpClient.newHttpClient();
-        URI uri = URI.create("http://localhost:" + HttpTaskServer.pathSubtask);
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .build();
+        runHttpTaskServer();
+        runKVServer();
+    }
+
+    private static void runKVServer() {
         try {
-            System.out.println("Before response");
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("After response");
+            KVServer kvServer = new KVServer();
+            kvServer.start();
+            URI uri = URI.create("http://localhost:" + KVServer.PORT + "/register");
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(uri)
+                    .build();
+            System.out.println("Before response kvServer");
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            System.out.println("After response kvServer");
             if (response.statusCode() == 200) {
                 System.out.println("Код ответа 200");
             } else {
@@ -30,6 +37,26 @@ public class HttpTaskClient {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        //httpTaskServer.stopServer();
+    }
+
+    private static void runHttpTaskServer() {
+        HttpTaskServer httpTaskServer = new HttpTaskServer();
+        URI uri = URI.create("http://localhost:" + HttpTaskServer.PORT + HttpTaskServer.pathSubtask);
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(uri)
+                .build();
+        try {
+            System.out.println("Before response HttpTaskServer");
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("After response HttpTaskServer");
+            if (response.statusCode() == 200) {
+                System.out.println("Код ответа 200");
+            } else {
+                System.out.println("Код ответа: ");
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

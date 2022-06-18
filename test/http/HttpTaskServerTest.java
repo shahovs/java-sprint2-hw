@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,32 +18,34 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 class HttpTaskServerTest {
-    final static String uriStart = "http://localhost:" + HttpTaskServer.PORT;
-    final static String uriHeadOnly = uriStart + HttpTaskServer.pathBeginOnly;
-    final static String uriTask = uriStart + HttpTaskServer.pathTask;
-    final static String uriSubtask = uriStart + HttpTaskServer.pathSubtask;
-    final static String uriEpic = uriStart + HttpTaskServer.pathEpic;
-    final static String uriHistory = uriStart + HttpTaskServer.pathHistory;
-    final static String uriPrioritized = uriStart + HttpTaskServer.pathPrioritized;
+    final static String localHostAndPort = "http://localhost:" + HttpTaskServer.PORT;
+    final static String uriHeadOnly = localHostAndPort + HttpTaskServer.pathBeginOnly;
+    final static String uriTask = localHostAndPort + HttpTaskServer.pathTask;
+    final static String uriSubtask = localHostAndPort + HttpTaskServer.pathSubtask;
+    final static String uriEpic = localHostAndPort + HttpTaskServer.pathEpic;
+    final static String uriHistory = localHostAndPort + HttpTaskServer.pathHistory;
+    final static String uriPrioritized = localHostAndPort + HttpTaskServer.pathPrioritized;
 
     static HttpTaskServer httpTaskServer;
     static Gson gson;
-    HttpClient client;
+    static HttpClient client;
 
     @BeforeAll
-    static void createAndRunHttpTaskServer() {
+    static void beforeAll() {
         httpTaskServer = new HttpTaskServer();
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
+        client = HttpClient.newHttpClient();
+
         //httpTaskServer.runServer();
         //new HttpTaskServer().runServer();
     }
 
-    @BeforeEach
-    void createHttpClient() {
-        client = HttpClient.newHttpClient();
-    }
+//    @BeforeEach
+//    void createHttpClient() {
+//        client = HttpClient.newHttpClient();
+//    }
 
 //    @AfterEach
 //    void afterEach() {
@@ -121,7 +122,50 @@ class HttpTaskServerTest {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    } // TODO Сделать тесты с неправильными id (0, 1000, -1, 1.2, "c", "char")
+    }
+
+
+    @Test
+    void getTaskByIdWithWrongId() {
+        URI uri = URI.create(uriTask + "/?id=-1");
+        HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
+                .header("Accept", "application/json").build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            //System.out.println("Тело ответа (getTaskById):\n" + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void getTaskByIdWithIncorrectId() {
+        URI uri = URI.create(uriTask + "/?id=incorrectId");
+        HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
+                .header("Accept", "application/json").build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            //System.out.println("Тело ответа (getTaskById):\n" + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    } // TODO Сделать тесты с неправильными id (0, 1000)
+
+    @Test
+    void getTaskByIdWithWrongIdDouble() {
+        URI uri = URI.create(uriTask + "/?id=1.1");
+        HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
+                .header("Accept", "application/json").build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            //System.out.println("Тело ответа (getTaskById):\n" + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     void postTaskWithDataTime() {

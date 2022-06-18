@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd_HH-mm");
-    public static final String EMPTY_STRING = "";
+    private static final String EMPTY_STRING = "";
 
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
