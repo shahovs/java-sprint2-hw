@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import http.EpicAdapter;
 import http.KVTaskClient;
 import http.LocalDateTimeAdapter;
+import http.SubtaskAdapter;
 import manager.FileBackedTaskManager;
 import model.*;
 
@@ -30,7 +31,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
         kvTaskClient = new KVTaskClient(uri);
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Epic.class, new EpicAdapter())
+                //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .setPrettyPrinting()
                 .create();
         // TODO После создания клиента менеджер запрашивает у него исходное состояние менеджера

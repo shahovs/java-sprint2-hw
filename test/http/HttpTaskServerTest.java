@@ -26,7 +26,7 @@ class HttpTaskServerTest {
     final static String URI_HISTORY = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_HISTORY; // "...:8080/tasks/history
     final static String URI_PRIORITIZED = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_PRIORITIZED; // ".../tasks/prioritized
 
-
+    static KVServer kvServer;
     static HttpClient client; // Это мы. Пользователь, который создает задачу и делает запросы по http
     static Gson gson; // Задачи мы передаем по http в формате json
     static HttpTaskServer httpTaskServer; // Также мы запускаем сервер, на который передаем свои запросы
@@ -36,27 +36,30 @@ class HttpTaskServerTest {
     static void beforeAll() {
         System.out.println("*************************************************************************");
         System.out.println("Запускаем тесты класса HttpTaskServerTest");
-        httpTaskServer = new HttpTaskServer();
+        try {
+            kvServer = new KVServer();
+            kvServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         client = HttpClient.newHttpClient();
-
-        //httpTaskServer.runServer();
-        //new HttpTaskServer().runServer();
     }
 
-//    @BeforeEach
-//    void createHttpClient() {
-//        client = HttpClient.newHttpClient();
-//    }
+    @BeforeEach
+    void beforeEach() {
+        httpTaskServer = new HttpTaskServer();
+    }
 
-//    @AfterEach
-//    void afterEach() {
-//    }
-//
-//    @AfterAll
-//    static void stopTaskServer() {
-//        httpTaskServer.stopServer();
-//    }
+    @AfterEach
+    void afterEach() {
+        httpTaskServer.stop();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        kvServer.stop();
+    }
 
     @Test
     void getAllTasks() {
@@ -105,7 +108,7 @@ class HttpTaskServerTest {
         HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            assertEquals(405, response.statusCode(), "Код ответа не равен 404");
             assertEquals("", response.body(), "Тело ответа на ошибочный запрос не равно пустой строке");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -126,7 +129,6 @@ class HttpTaskServerTest {
         }
     }
 
-
     @Test
     void getTaskByIdWithWrongId() {
         URI uri = URI.create(URI_TASK + "/?id=-1");
@@ -134,8 +136,7 @@ class HttpTaskServerTest {
                 .header("Accept", "application/json").build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
-            //System.out.println("Тело ответа (getTaskById):\n" + response.body());
+            assertEquals(400, response.statusCode(), "Код ответа не равен 404");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -148,12 +149,11 @@ class HttpTaskServerTest {
                 .header("Accept", "application/json").build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
-            //System.out.println("Тело ответа (getTaskById):\n" + response.body());
+            assertEquals(400, response.statusCode(), "Код ответа не равен 404");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-    } // TODO Сделать тесты с неправильными id (0, 1000)
+    }
 
     @Test
     void getTaskByIdWithWrongIdDouble() {
@@ -162,7 +162,7 @@ class HttpTaskServerTest {
                 .header("Accept", "application/json").build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            assertEquals(404, response.statusCode(), "Код ответа не равен 404");
+            assertEquals(400, response.statusCode(), "Код ответа не равен 404");
             //System.out.println("Тело ответа (getTaskById):\n" + response.body());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -187,19 +187,6 @@ class HttpTaskServerTest {
     }
 
     @Test
-    void deleteTaskById() {
-        URI uri = URI.create(URI_TASK + "/?id=1");
-        HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri)
-                .header("Accept", "application/json").build();
-        try {
-            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
     void postTaskWithoutDataTime() {
         URI uri = URI.create(URI_TASK);
         String json = gson.toJson(new Task("nameTask", "withoutDataTime"));
@@ -216,9 +203,45 @@ class HttpTaskServerTest {
     }
 
     @Test
+    void postEpic() {
+        URI uri = URI.create(URI_EPIC);
+        String json = gson.toJson(new Epic("nameEpic", "withDataTime", 0));
+        System.out.println("json(new Epic):\n" + json);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build();
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
+            //System.out.println("response.statusCode()=" + response.statusCode());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    Epic getEpicForTests() {
+        URI uri = URI.create(URI_EPIC);
+        // id эпика должен быть равен 1, так как subtask должна быть создана с конкретным эпиком
+        // иначе тесты с subtask не пройдут
+        Epic epic = new Epic("nameEpic", "withDataTime", 1);
+        String json = gson.toJson(epic);
+        System.out.println("json(new Epic):\n" + json);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build();
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
+            //System.out.println("response.statusCode()=" + response.statusCode());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return epic;
+    }
+
+    @Test
     void postSubtaskWithoutDataTime() {
+        Epic epic = getEpicForTests();
         URI uri = URI.create(URI_SUBTASK);
-        String json = gson.toJson(new Task("nameSubtask", "description"));
+        String json = gson.toJson(new Subtask("nameSubtask", "description", 0, Task.Status.NEW, epic));
         System.out.println("json(new Subtask):\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         HttpRequest request = HttpRequest.newBuilder().POST(body).uri(uri).build(); // .header(...)
@@ -227,6 +250,19 @@ class HttpTaskServerTest {
             assertEquals(200, response.statusCode(), "Код ответа не равен 200");
         } catch (IOException |
                 InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    void deleteTaskById() {
+        URI uri = URI.create(URI_TASK + "/?id=1");
+        HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri)
+                .header("Accept", "application/json").build();
+        try {
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            assertEquals(200, response.statusCode(), "Код ответа не равен 200");
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

@@ -50,7 +50,7 @@ public class HttpTaskServer {
         this.manager = manager;
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Epic.class, new EpicAdapter())
+                //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .create();
         try {
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -73,7 +73,8 @@ public class HttpTaskServer {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             if (!"GET".equals(httpExchange.getRequestMethod())) {
-                httpExchange.sendResponseHeaders(404, 0);
+                System.out.println("/tasks/ ждёт GET-запрос, а получил: " + httpExchange.getRequestMethod());
+                httpExchange.sendResponseHeaders(405, 0);
                 httpExchange.close();
                 return;
             }
@@ -96,7 +97,8 @@ public class HttpTaskServer {
     // path: "/tasks/prioritized"
     private void prioritizedHandle(HttpExchange httpExchange) throws IOException {
         if (!"GET".equals(httpExchange.getRequestMethod())) {
-            httpExchange.sendResponseHeaders(404, 0);
+            System.out.println("/tasks/prioritized ждёт GET-запрос, а получил: " + httpExchange.getRequestMethod());
+            httpExchange.sendResponseHeaders(405, 0);
             httpExchange.close();
             return;
         }
@@ -116,7 +118,8 @@ public class HttpTaskServer {
     // path: "/tasks/history"
     private void historyHandle(HttpExchange httpExchange) throws IOException {
         if (!"GET".equals(httpExchange.getRequestMethod())) {
-            httpExchange.sendResponseHeaders(404, 0);
+            System.out.println("/tasks/history ждёт GET-запрос, а получил: " + httpExchange.getRequestMethod());
+            httpExchange.sendResponseHeaders(405, 0);
             httpExchange.close();
             return;
         }
@@ -144,7 +147,8 @@ public class HttpTaskServer {
                 // path: "/tasks/task/?id=.."
                 int id = getId(httpExchange);
                 if (id < 0) {
-                    httpExchange.sendResponseHeaders(404, 0);
+                    System.out.println("/tasks/task id меньше нуля или в нечитаемом формате");
+                    httpExchange.sendResponseHeaders(400, 0);
                     return;
                 }
                 switch (method) {
@@ -160,7 +164,9 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/task/?id= ждёт GET или DELETE-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             } else {
                 // if uri has NO id (path: "/tasks/task")
@@ -179,7 +185,8 @@ public class HttpTaskServer {
                     case "POST":
                         Task newTask = getTask(httpExchange);
                         if (newTask == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/task POST Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         manager.createTask(newTask);
@@ -188,14 +195,17 @@ public class HttpTaskServer {
                     case "PUT":
                         Task updatedTask = getTask(httpExchange);
                         if (updatedTask == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/task PUT Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         manager.updateTask(updatedTask);
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/task ждёт GET/DELETE/POST или PUT-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             }
 
@@ -235,24 +245,9 @@ public class HttpTaskServer {
         if (jsonObject == null) {
             return null;
         }
-
-        //TODO Можно и нужно десериализовать напрямую. Вот так:
-//        Task t = gson.fromJson(jsonObject, Task.class);
-//        System.out.println("Десереализуем напрямую из json в Task:\n" + t);
-
-        String name = jsonObject.get("name").getAsString();
-
-        String description = jsonObject.get("description").getAsString();
-        String statusString = jsonObject.get("status").getAsString();
-        Task.Status status = Task.Status.NEW;
-        try {
-            status = Task.Status.valueOf(statusString);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            e.printStackTrace();
-        }
-        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
-        int duration = jsonObject.get("duration").getAsInt();
-        return new Task(name, description, 0, status, startTime, duration);
+        Task task = gson.fromJson(jsonObject, Task.class);
+        System.out.println("Десереализуем из json в Task:\n" + task);
+        return task;
     }
 
     private Subtask getSubtask(HttpExchange httpExchange) {
@@ -260,34 +255,14 @@ public class HttpTaskServer {
         if (jsonObject == null) {
             return null;
         }
-        String name = jsonObject.get("name").getAsString();
-        String description = jsonObject.get("description").getAsString();
-        String statusString = jsonObject.get("status").getAsString();
-        Task.Status status = Task.Status.NEW;
-        try {
-            status = Task.Status.valueOf(statusString);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            e.printStackTrace();
-        }
-        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
-        int duration = jsonObject.get("duration").getAsInt();
-        JsonElement epicAsJsonElement = jsonObject.get("epic");
-        if (epicAsJsonElement.isJsonObject()) {
-            JsonObject epic = epicAsJsonElement.getAsJsonObject();
-            int idEpic = epic.get("id").getAsInt();
-            return new Subtask(name, description, 0, status,
-                    new Epic("", "", idEpic), startTime, duration);
-        }
-        return null;
-    }
+        String jsonObjectString = jsonObject.toString();
+        System.out.println("jsonObjectString: " + jsonObjectString);
+        Subtask subtask = gson.fromJson(jsonObjectString, Subtask.class);
+        System.out.println("Десереализуем из json в Subtask:\n" + subtask);
+        return subtask;
 
-    private Epic getEpic(HttpExchange httpExchange) {
-        JsonObject jsonObject = getJsonObject(httpExchange);
-        if (jsonObject == null) {
-            return null;
-        }
-        String name = jsonObject.get("name").getAsString();
-        String description = jsonObject.get("description").getAsString();
+//        String name = jsonObject.get("name").getAsString();
+//        String description = jsonObject.get("description").getAsString();
 //        String statusString = jsonObject.get("status").getAsString();
 //        Task.Status status = Task.Status.NEW;
 //        try {
@@ -297,7 +272,37 @@ public class HttpTaskServer {
 //        }
 //        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
 //        int duration = jsonObject.get("duration").getAsInt();
-        return new Epic(name, description);
+//        JsonElement epicAsJsonElement = jsonObject.get("epic");
+//        if (epicAsJsonElement.isJsonObject()) {
+//            JsonObject epic = epicAsJsonElement.getAsJsonObject();
+//            int idEpic = epic.get("id").getAsInt();
+//            return new Subtask(name, description, 0, status,
+//                    new Epic("", "", idEpic), startTime, duration);
+//        }
+//        return null;
+    }
+
+    private Epic getEpic(HttpExchange httpExchange) {
+        JsonObject jsonObject = getJsonObject(httpExchange);
+        if (jsonObject == null) {
+            return null;
+        }
+        Epic epic = gson.fromJson(jsonObject, Epic.class);
+        System.out.println("Десереализуем из json в Epic:\n" + epic);
+        return epic;
+
+//        String name = jsonObject.get("name").getAsString();
+//        String description = jsonObject.get("description").getAsString();
+//        String statusString = jsonObject.get("status").getAsString();
+//        Task.Status status = Task.Status.NEW;
+//        try {
+//            status = Task.Status.valueOf(statusString);
+//        } catch (IllegalArgumentException | NullPointerException e) {
+//            e.printStackTrace();
+//        }
+//        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
+//        int duration = jsonObject.get("duration").getAsInt();
+//        return new Epic(name, description);
     }
 
     private JsonObject getJsonObject(HttpExchange httpExchange) {
@@ -326,7 +331,8 @@ public class HttpTaskServer {
                 // path: "/tasks/subtask/?id=.."
                 int id = getId(httpExchange);
                 if (id < 0) {
-                    httpExchange.sendResponseHeaders(404, 0);
+                    System.out.println("/tasks/subtask id меньше нуля или в нечитаемом формате");
+                    httpExchange.sendResponseHeaders(400, 0);
                     return;
                 }
                 switch (method) {
@@ -342,7 +348,9 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/subtask/?id= ждёт GET или DELETE-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             } else {
                 // if uri has NO id (path: "/tasks/subtask")
@@ -361,7 +369,8 @@ public class HttpTaskServer {
                     case "POST":
                         Subtask newSubtask = getSubtask(httpExchange);
                         if (newSubtask == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/subtask POST Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         System.out.println("HttpTaskServer POST Subtask (newSubtask):" + newSubtask);
@@ -372,14 +381,17 @@ public class HttpTaskServer {
                     case "PUT":
                         Subtask updatedSubtask = getSubtask(httpExchange);
                         if (updatedSubtask == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/subtask PUT Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         manager.updateSubtask(updatedSubtask);
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/subtask ждёт GET/DELETE/POST или PUT-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             }
 
@@ -401,7 +413,8 @@ public class HttpTaskServer {
                 // path: "/tasks/epic/?id=.."
                 int id = getId(httpExchange);
                 if (id < 0) {
-                    httpExchange.sendResponseHeaders(404, 0);
+                    System.out.println("/tasks/epic id меньше нуля или в нечитаемом формате");
+                    httpExchange.sendResponseHeaders(400, 0);
                     return;
                 }
                 switch (method) {
@@ -417,7 +430,9 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/epic/?id= ждёт GET или DELETE-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             } else {
                 // if uri has NO id (path: "/tasks/epic")
@@ -436,7 +451,8 @@ public class HttpTaskServer {
                     case "POST":
                         Epic newEpic = getEpic(httpExchange);
                         if (newEpic == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/epic POST Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         manager.createEpic(newEpic);
@@ -445,14 +461,17 @@ public class HttpTaskServer {
                     case "PUT":
                         Epic updatedEpic = getEpic(httpExchange);
                         if (updatedEpic == null) {
-                            httpExchange.sendResponseHeaders(404, 0);
+                            System.out.println("/tasks/epic PUT Задача не прочитана (== null)");
+                            httpExchange.sendResponseHeaders(400, 0);
                             return;
                         }
                         manager.updateEpic(updatedEpic);
                         httpExchange.sendResponseHeaders(200, 0);
                         break;
                     default:
-                        httpExchange.sendResponseHeaders(404, 0);
+                        System.out.println("/tasks/epic ждёт GET/DELETE/POST или PUT-запрос, а получил: " +
+                                httpExchange.getRequestMethod());
+                        httpExchange.sendResponseHeaders(405, 0);
                 }
             }
 
@@ -462,11 +481,11 @@ public class HttpTaskServer {
             httpExchange.close();
         }
     }
-
-    private void send404AndClose(HttpExchange httpExchange) throws IOException {
-        httpExchange.sendResponseHeaders(404, 0);
-        httpExchange.close();
-    }
+//
+//    private void send404AndClose(HttpExchange httpExchange) throws IOException {
+//        httpExchange.sendResponseHeaders(404, 0);
+//        httpExchange.close();
+//    }
 
     private void sendBodyAndClose(HttpExchange httpExchange, String responseBody) {
         try (OutputStream os = httpExchange.getResponseBody();) {

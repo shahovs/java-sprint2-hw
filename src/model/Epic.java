@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Epic extends Task {
-    private ArrayList<Subtask> subtasks;
+    private transient ArrayList<Subtask> subtasks;
 
     public Epic(String name, String description, int id) {
         super(name, description, id, Task.Status.NEW);
@@ -20,6 +20,10 @@ public class Epic extends Task {
     }
 
     public void addSubtask(Subtask subtask) {
+        if (subtasks == null) {
+            System.out.println("subtask in epic == null");
+            subtasks = new ArrayList<>();
+        }
         subtasks.add(subtask);
         setStartTimeDurationAndCalculateFinish(null, 0);
     }

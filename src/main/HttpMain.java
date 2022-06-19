@@ -4,10 +4,7 @@ package main;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import http.EpicAdapter;
-import http.HttpTaskServer;
-import http.KVServer;
-import http.LocalDateTimeAdapter;
+import http.*;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -50,7 +47,7 @@ public class HttpMain {
     static {
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Epic.class, new EpicAdapter())
+                //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .setPrettyPrinting()
                 .create();
         client = HttpClient.newHttpClient();
