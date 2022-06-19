@@ -10,21 +10,21 @@ import java.util.List;
 
 import model.*;
 
-abstract class TaskManagerTest<T extends TaskManager> {
+public abstract class TaskManagerTest<T extends TaskManager> {
     T manager;
     Task task;
     Epic epic;
     Subtask subtask;
 
-    void initManager() {
+    public void initManager() {
         task = new Task("taskName", "d", 0, Task.Status.NEW,
                 LocalDateTime.of(2022, 1, 1, 12, 0, 0), 5);
         epic = new Epic("epicName", "d", 0);
         subtask = new Subtask("subtaskName", "d", 0, Task.Status.NEW, epic,
                 LocalDateTime.of(2022, 2, 2, 12, 0, 0), 15);
         manager.createTask(task);
-        manager.createEpic(epic);
-        manager.createSubtask(subtask); //System.out.println("subtask id: " + subtask.getId());
+//        manager.createEpic(epic);
+//        manager.createSubtask(subtask);
     }
 
     @Test

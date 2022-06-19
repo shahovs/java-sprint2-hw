@@ -38,7 +38,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void load() { // Восстановление данных из файла
+    protected void load() { // Восстановление данных из файла
         try (final BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             reader.readLine(); // Пропустили первую строку с заголовками
             String line = reader.readLine();
@@ -123,7 +123,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() throws ManagerSaveException { // Сохранение данных в файл
+    protected void save() throws ManagerSaveException { // Сохранение данных в файл
         try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
             writer.write("id,type,name,status,description,start,duration,finish,epic\n");
 

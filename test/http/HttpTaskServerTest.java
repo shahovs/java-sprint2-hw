@@ -18,20 +18,24 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 class HttpTaskServerTest {
-    final static String localHostAndPort = "http://localhost:" + HttpTaskServer.PORT;
-    final static String uriHeadOnly = localHostAndPort + HttpTaskServer.pathBeginOnly;
-    final static String uriTask = localHostAndPort + HttpTaskServer.pathTask;
-    final static String uriSubtask = localHostAndPort + HttpTaskServer.pathSubtask;
-    final static String uriEpic = localHostAndPort + HttpTaskServer.pathEpic;
-    final static String uriHistory = localHostAndPort + HttpTaskServer.pathHistory;
-    final static String uriPrioritized = localHostAndPort + HttpTaskServer.pathPrioritized;
+    final static String LOCAL_HOST_AND_PORT = "http://localhost:" + HttpTaskServer.PORT; // "http://localhost:8080"
+    final static String URI_HEAD_ONLY = LOCAL_HOST_AND_PORT + HttpTaskServer.PATH_BEGIN_ONLY; // "http:...:8080/tasks
+    final static String URI_TASK = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_TASK; // "http:...:8080/task
+    final static String URI_SUBTASK = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_SUBTASK; // "...:8080/tasks/subtask
+    final static String URI_EPIC = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_EPIC; // "...:8080/tasks/epic
+    final static String URI_HISTORY = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_HISTORY; // "...:8080/tasks/history
+    final static String URI_PRIORITIZED = LOCAL_HOST_AND_PORT + HttpTaskServer.TASKS_PRIORITIZED; // ".../tasks/prioritized
 
-    static HttpTaskServer httpTaskServer;
-    static Gson gson;
-    static HttpClient client;
+
+    static HttpClient client; // Это мы. Пользователь, который создает задачу и делает запросы по http
+    static Gson gson; // Задачи мы передаем по http в формате json
+    static HttpTaskServer httpTaskServer; // Также мы запускаем сервер, на который передаем свои запросы
+//     Также мы запускаем KVServer, который будет получать, хранить и возвращать состояние менеджера задач
 
     @BeforeAll
     static void beforeAll() {
+        System.out.println("*************************************************************************");
+        System.out.println("Запускаем тесты класса HttpTaskServerTest");
         httpTaskServer = new HttpTaskServer();
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
@@ -58,32 +62,32 @@ class HttpTaskServerTest {
 
     @Test
     void getAllTasks() {
-        createAndSendGetRequestAndCheckResponse(uriHeadOnly, "getAllTasks");
+        createAndSendGetRequestAndCheckResponse(URI_HEAD_ONLY, "getAllTasks");
     }
 
     @Test
     void getPrioritizedTasks() {
-        createAndSendGetRequestAndCheckResponse(uriPrioritized, "getPrioritizedTasks");
+        createAndSendGetRequestAndCheckResponse(URI_PRIORITIZED, "getPrioritizedTasks");
     }
 
     @Test
     void getHistory() {
-        createAndSendGetRequestAndCheckResponse(uriHistory, "getHistory");
+        createAndSendGetRequestAndCheckResponse(URI_HISTORY, "getHistory");
     }
 
     @Test
     void getAllTasksWithError() {
-        createAndSendWrongMethodDelete(uriHeadOnly, "getAllTasks");
+        createAndSendWrongMethodDelete(URI_HEAD_ONLY, "getAllTasks");
     }
 
     @Test
     void getPrioritizedTasksWithError() {
-        createAndSendWrongMethodDelete(uriPrioritized, "getPrioritizedTasks");
+        createAndSendWrongMethodDelete(URI_PRIORITIZED, "getPrioritizedTasks");
     }
 
     @Test
     void getHistoryWithError() {
-        createAndSendWrongMethodDelete(uriHistory, "getHistory");
+        createAndSendWrongMethodDelete(URI_HISTORY, "getHistory");
     }
 
     private void createAndSendGetRequestAndCheckResponse(String path, String methodName) {
@@ -112,7 +116,7 @@ class HttpTaskServerTest {
 
     @Test
     void getTaskById() {
-        URI uri = URI.create(uriTask + "/?id=1");
+        URI uri = URI.create(URI_TASK + "/?id=1");
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -127,7 +131,7 @@ class HttpTaskServerTest {
 
     @Test
     void getTaskByIdWithWrongId() {
-        URI uri = URI.create(uriTask + "/?id=-1");
+        URI uri = URI.create(URI_TASK + "/?id=-1");
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -141,7 +145,7 @@ class HttpTaskServerTest {
 
     @Test
     void getTaskByIdWithIncorrectId() {
-        URI uri = URI.create(uriTask + "/?id=incorrectId");
+        URI uri = URI.create(URI_TASK + "/?id=incorrectId");
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -155,7 +159,7 @@ class HttpTaskServerTest {
 
     @Test
     void getTaskByIdWithWrongIdDouble() {
-        URI uri = URI.create(uriTask + "/?id=1.1");
+        URI uri = URI.create(URI_TASK + "/?id=1.1");
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -169,7 +173,7 @@ class HttpTaskServerTest {
 
     @Test
     void postTaskWithDataTime() {
-        URI uri = URI.create(uriTask);
+        URI uri = URI.create(URI_TASK);
         String json = gson.toJson(new Task("nameTask", "withDataTime", 0, Task.Status.DONE,
                 LocalDateTime.of(2022, 12, 31, 23, 59, 0), 50));
         System.out.println("json(new Task):\n" + json);
@@ -186,7 +190,7 @@ class HttpTaskServerTest {
 
     @Test
     void deleteTaskById() {
-        URI uri = URI.create(uriTask + "/?id=1");
+        URI uri = URI.create(URI_TASK + "/?id=1");
         HttpRequest request = HttpRequest.newBuilder().DELETE().uri(uri)
                 .header("Accept", "application/json").build();
         try {
@@ -199,7 +203,7 @@ class HttpTaskServerTest {
 
     @Test
     void postTaskWithoutDataTime() {
-        URI uri = URI.create(uriTask);
+        URI uri = URI.create(URI_TASK);
         String json = gson.toJson(new Task("nameTask", "withoutDataTime"));
         System.out.println("json(new Task):\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
@@ -215,7 +219,7 @@ class HttpTaskServerTest {
 
     @Test
     void postSubtaskWithoutDataTime() {
-        URI uri = URI.create(uriSubtask);
+        URI uri = URI.create(URI_SUBTASK);
         String json = gson.toJson(new Task("nameSubtask", "description"));
         System.out.println("json(new Subtask):\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);

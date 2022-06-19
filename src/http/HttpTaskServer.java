@@ -2,7 +2,6 @@ package http;
 
 // ИТОГО ОСТАЛОСЬ ДОДЕЛАТЬ В ЭТОМ КЛАССЕ:
 // - обработка эпиков и сабтасков (по аналогии с тасками, но с особенностями - содержащимися в них элементами)
-// - заменить файл менеджер на сервер менеджер
 // - все протестировать
 
 import java.net.InetSocketAddress;
@@ -14,6 +13,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 
+import manager.HttpTaskManager;
 import manager.Managers;
 import manager.TaskManager;
 import model.*;
@@ -31,34 +31,34 @@ import java.util.TreeSet;
 
 public class HttpTaskServer {
     public static final int PORT = 8080;
-    public final static String pathBeginOnly = "/tasks"; // Переделать все константы в верхнем регистре
-    public final static String pathTask = "/tasks/task";
-    public final static String pathSubtask = "/tasks/subtask";
-    public final static String pathEpic = "/tasks/epic";
-    public final static String pathHistory = "/tasks/history";
-    public final static String pathPrioritized = "/tasks/prioritized";
-    public final static String idAttribute = "id=";
+    public final static String PATH_BEGIN_ONLY = "/tasks"; // Переделать все константы в верхнем регистре
+    public final static String TASKS_TASK = "/tasks/task";
+    public final static String TASKS_SUBTASK = "/tasks/subtask";
+    public final static String TASKS_EPIC = "/tasks/epic";
+    public final static String TASKS_HISTORY = "/tasks/history";
+    public final static String TASKS_PRIORITIZED = "/tasks/prioritized";
+    public final static String ID_ATTRIBUTE = "id=";
 
     private final Gson gson;
     private final TaskManager manager;
+    private HttpServer httpServer;
 
     public HttpTaskServer() {
-        this(Managers.getDefault());
+        this(new HttpTaskManager("http://localhost:" + KVServer.PORT)); //TODO поменять на Managers.getDefault()
     }
 
     public HttpTaskServer(TaskManager manager) {
         this.manager = manager;
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         try {
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
-            httpServer.createContext(pathBeginOnly, new tasksHandler()); // сделал такой вариант для примера
-            httpServer.createContext(pathPrioritized, this::prioritizedHandle);
-            httpServer.createContext(pathHistory, this::historyHandle);
-            httpServer.createContext(pathTask, this::taskHandle);
-            httpServer.createContext(pathSubtask, this::subtaskHandle);
-            httpServer.createContext(pathEpic, this::epicHandle);
+            httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
+            httpServer.createContext(PATH_BEGIN_ONLY, new tasksHandler()); // сделал такой вариант для примера
+            httpServer.createContext(TASKS_PRIORITIZED, this::prioritizedHandle);
+            httpServer.createContext(TASKS_HISTORY, this::historyHandle);
+            httpServer.createContext(TASKS_TASK, this::taskHandle);
+            httpServer.createContext(TASKS_SUBTASK, this::subtaskHandle);
+            httpServer.createContext(TASKS_EPIC, this::epicHandle);
+            System.out.println("Запускаем сервер на порту " + PORT);
             httpServer.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -214,7 +214,7 @@ public class HttpTaskServer {
     private boolean checkIdQuery(HttpExchange httpExchange) {
         URI uri = httpExchange.getRequestURI();
         String queryComponent = uri.getQuery(); // "id=1" or null
-        if (queryComponent != null && queryComponent.startsWith(idAttribute)) {
+        if (queryComponent != null && queryComponent.startsWith(ID_ATTRIBUTE)) {
             return true;
         }
         return false;
@@ -226,8 +226,8 @@ public class HttpTaskServer {
 //        System.out.println("getQuery(): " + queryComponent);
 //        System.out.println("getRawQuery(): " + uri.getRawQuery());
         int id = -1;
-        if (queryComponent != null && queryComponent.startsWith(idAttribute)) {
-            String idString = queryComponent.substring(idAttribute.length());
+        if (queryComponent != null && queryComponent.startsWith(ID_ATTRIBUTE)) {
+            String idString = queryComponent.substring(ID_ATTRIBUTE.length());
             try {
                 id = Integer.parseInt(idString); //System.out.println("id=" + id);
             } catch (NumberFormatException e) {
@@ -304,12 +304,13 @@ public class HttpTaskServer {
     }
 
 
-//     Метод stopServer() не работает. Как остановить сервер?
+    //     Метод stopServer() не работает. Как остановить сервер?
 //     (тесты умеют останавливать сервер сами, а вызовы из обычных классов - нет)
-//    public void stopServer() {
-//        System.out.println("Останавливаем сервер");
-//        httpServer.stop(1);
-//    }
+    public void stop() {
+        System.out.println("Останавливаем HttpTaskServer");
+        httpServer.stop(0);
+        System.out.println("HttpTaskServer остановлен");
+    }
 
 } // end of class
 

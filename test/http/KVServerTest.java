@@ -30,6 +30,8 @@ class KVServerTest {
 
     @BeforeAll
     static void beforeAll() {
+        System.out.println("*************************************************************************");
+        System.out.println("Запускаем тесты класса KVServerTest");
         try {
             server = new KVServer();
             server.start();
@@ -45,6 +47,12 @@ class KVServerTest {
         loadTest();
         reSaveTest();
         secondLoadTest();
+    }
+
+
+    @AfterAll
+    static void stopKVServer() {
+        server.stop();
     }
 
     @Test

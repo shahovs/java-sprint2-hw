@@ -1,5 +1,5 @@
 package http;
-
+// KVServer. KV - key, value.
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
@@ -160,6 +160,12 @@ public class KVServer {
         System.out.println("Открой в браузере http://localhost:" + PORT + "/");
         System.out.println("API_TOKEN: " + apiToken);
         server.start();
+    }
+
+    public void stop() {
+        System.out.println("Останавливаем KVServer");
+        server.stop(0);
+        System.out.println("KVServer остановлен");
     }
 
     private String generateApiToken() {

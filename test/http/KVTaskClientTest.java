@@ -3,6 +3,7 @@ package http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.Task;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -14,11 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class KVTaskClientTest {
     static KVTaskClient kvTaskClient;
     static Gson gson;
+    static KVServer kvServer;
 
     @BeforeAll
     static void createKVClient() {
+        System.out.println("*************************************************************************");
+        System.out.println("Запускаем тесты класса KVTaskClientTest");
         try {
-            KVServer kvServer = new KVServer();
+            kvServer = new KVServer();
             kvServer.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -28,6 +32,12 @@ class KVTaskClientTest {
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
     }
+
+    @AfterAll
+    static void stopKVServer() {
+        kvServer.stop();
+    }
+
 
     @Test
     void putTest() {

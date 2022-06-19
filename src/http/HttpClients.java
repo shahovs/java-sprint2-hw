@@ -1,6 +1,6 @@
 package http;
-//TODO Этот класс можно удалить.
-// Он пригодился для запуска серверов, чтобы использовать Insomnia
+// Этот класс используется для запуска нужных серверов без последующей их остановки.
+// Пригодился, чтобы использовать Insomnia или браузер
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -9,7 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 
-public class HttpTaskClient {
+public class HttpClients {
     static HttpClient client = HttpClient.newHttpClient();
 
     public static void main(String[] args) {
@@ -41,7 +41,7 @@ public class HttpTaskClient {
 
     private static void runHttpTaskServer() {
         HttpTaskServer httpTaskServer = new HttpTaskServer();
-        URI uri = URI.create("http://localhost:" + HttpTaskServer.PORT + HttpTaskServer.pathSubtask);
+        URI uri = URI.create("http://localhost:" + HttpTaskServer.PORT + HttpTaskServer.TASKS_SUBTASK);
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)

@@ -38,7 +38,7 @@ public class KVTaskClient {
     }
 
     // должен сохранять состояние менеджера задач через запрос POST /save/<ключ>?API_TOKEN=
-    void put(String key, String json) {
+    public void put(String key, String json) {
 
         URI uriSave = URI.create(uri + "/save" + "/" + key + "?API_TOKEN=" + token);
 
@@ -55,7 +55,7 @@ public class KVTaskClient {
     }
 
     // должен возвращать состояние менеджера задач через запрос GET /load/<ключ>?API_TOKEN=
-    String load(String key) {
+    public String load(String key) {
         URI uriLoad = URI.create(uri + "/load" + "/" + key + "?API_TOKEN=" + token);
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uriLoad).build();
         String result = "";

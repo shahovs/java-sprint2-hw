@@ -1,57 +1,43 @@
 # java-sprint2-hw
-Second sprint homework
 
 
-//    static String toString(HistoryManager manager){}
-//    private static List<Integer> fromString(String line) {
-//        List<Integer> ids = new ArrayList<>();
-//        if (line == null || line.isBlank()) {
-//            return ids;
-//        }
-//        String[] integers = line.split(",");
-//        for (String id : integers) {
-//            ids.add(Integer.parseInt(id));
-//        }
-//        return ids;
-//    }
-
-//    private static Task fromString(String line) {
-//        if (line.startsWith("id") || line.isBlank()) {
-//            System.out.println("Ошибка. Неправильная строка.");
-//            return new Task("", "");
-//        }
-//
-//        String[] elements = line.split(",");
-//        if (elements.length < 5) {
-//            System.out.println("Ошибка. Элементов в строке недостаточно");
-//            return new Task("", "");
-//        }
-//
-//        int id = Integer.parseInt(elements[0]);
-//        TypesOfTasks type = TypesOfTasks.valueOf(elements[1]);
-//        String name = elements[2];
-//        Task.Status status = Task.Status.valueOf(elements[3]);
-//        String description = elements[4];
-//
-//        Task result = new Task("", "");
-//        switch (type) {
-//            case TASK:
-//                result = new Task(name, description, id, status);
-//                break;
-//            case EPIC:
-//                result = new Epic(name, description, id);
-//                break;
-//            case SUBTASK:
-//                if (elements.length == 6) {
-//                    int idEpic = Integer.parseInt(elements[5]); //System.out.println("IDEPIC: " + idEpic);
-//                    //Epic epic = manager.getEpic(idEpic);
-//                    result = new Subtask(name, description, id, status, idEpic);
-//                } else {
-//                    System.out.println("Ошибка. У подзадачи не найден id эпика.");
-//                }
-//                break;
-//            default:
-//                System.out.println("Ошибка. Не найдет тип задачи.");
-//        }
-//        return result;
-//    }
+/**
+* ###################################
+* http взаимодействие компонентов
+* 
+* Новая задача передается по пути:
+* 
+* (1) Конечный пользователь (/user/клиент/frontend/браузер/Insomnia)
+* (у меня это httpClient в классе HttpTaskServerTest):
+* делаем задачу (new Task(...)), переоформляем ее в json (toJson()) и отправляем на сервер ->
+* 
+* -> ..(a) http-запрос8080:tasks/... (body = задача в json).. ->
+* 
+* (2) HttpTaskServer (при первом запуске создает менеджера HttpTaskManager,
+* далее получает http-запрос в json, делает из него задачу (десериализует)(fromJson()) и вызывает методы менеджера ->
+* 
+* -> ..(b) задача (manager.createTask(task)).. ->
+* 
+* (3) HttpTaskManager вначале создает KVTaskClient и получает исходное состояние от KVTaskClient (из KVServer),
+* далее получает задачу (в качестве аргумента при вызове его метода createTask(task)), кладет ее в свою мапу, 
+* сохраняет свое состояние в json и передает его в KVTaskClient (для передачи на KVServer)
+*     this.save() { kvTaskClient.put(String key, String json); } 
+*     this.load(String key) { kvTaskClient.load() } ->
+* 
+* -> ..(c) состояние менеджера в json (все задачи, история).. ->
+* 
+* (4) KVTaskClient получает состояние менеджера и отправляет на KVServer ->
+* (void this.put(String key, String json)    String this.load(String key))
+* 
+* -> ..(d) http-запрос8078: состояние менеджера в json..->
+* (POST /save/<ключ>?API_TOKEN=    GET /load/<ключ>?API_TOKEN=)
+* 
+* (5) KVServer получает состояние менеджера в json и сохраняет json (String value) в свою мапу
+* 
+* Оба сервера создаем и запускаем сразу, поскольку предполагается, что они должны работать к началу работы с задачами
+* (то есть должны работать всегда).
+* 
+* HttpTaskServer создает HttpTaskManager
+* HttpTaskManager создает KVTaskClient
+* ###################################
+*/
