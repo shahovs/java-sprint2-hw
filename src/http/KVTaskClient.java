@@ -1,19 +1,12 @@
 package http;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import model.Task;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
 
 public class KVTaskClient {
-//    final static String LOCAL_HOST_AND_PORT = "http://localhost:" + KVServer.PORT;
-
     static HttpClient client;
     URI uri;
     String token;

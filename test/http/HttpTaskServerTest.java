@@ -37,9 +37,7 @@ class HttpTaskServerTest {
         System.out.println("*************************************************************************");
         System.out.println("Запускаем тесты класса HttpTaskServerTest");
         httpTaskServer = new HttpTaskServer();
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+        gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         client = HttpClient.newHttpClient();
 
         //httpTaskServer.runServer();
