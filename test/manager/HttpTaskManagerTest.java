@@ -8,21 +8,28 @@ import java.io.IOException;
 import java.util.List;
 
 class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
-
+    KVServer kvServer;
     @BeforeAll
     static void createHttpTaskManager() {
-        try {
-            KVServer kvServer = new KVServer();
-            kvServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     @BeforeEach
     void initHttpTaskManager() {
+        try {
+            kvServer = new KVServer();
+            kvServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         manager = new HttpTaskManager("http://localhost:" + KVServer.PORT);
         initManager();
+    }
+
+
+    @AfterEach
+    void afterEach() {
+        kvServer.stop();
     }
 
     @Test

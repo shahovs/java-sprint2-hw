@@ -28,38 +28,49 @@ public class HttpTaskManager extends FileBackedTaskManager {
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .setPrettyPrinting()
                 .create();
+        load();
     }
 
     // Обращается к KVTaskClient, чтобы загрузить задачи (состояние менеджера) из KVServer
     @Override
     protected void load() {
-//        tasks = gson.fromJson(json, List.class);
+//        tasksFromServer = gson.fromJson(json, List.class);
+        System.out.println("\nHttpTaskManager /load");
+
         String json = kvTaskClient.load(KEY_TASKS);
-        List<Task> tasks;
-        tasks = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {
+        List<Task> tasksFromServer;
+        tasksFromServer = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {
         }.getType());
-        // TODO Возможно, вместо List<Task> нужен ArrayList<Task> или наоборот (проверить)
-        System.out.println("HttpTaskManager.load() fromJson (tasks):\n" + tasks);
-        for (Task task : tasks) {
-            createTask(task);
+        System.out.println("HttpTaskManager.load() fromJson (tasksFromServer):\n" + tasksFromServer);
+        if (tasksFromServer != null) {
+            for (Task task : tasksFromServer) {
+                int id = task.getId();
+                tasks.put(id, task);
+            }
         }
 
         json = kvTaskClient.load(KEY_SUBTASKS);
-        List<Subtask> subtasks;
-        subtasks = gson.fromJson(json, new TypeToken<ArrayList<Subtask>>() {
+        List<Subtask> subtasksFromServer;
+        subtasksFromServer = gson.fromJson(json, new TypeToken<ArrayList<Subtask>>() {
         }.getType());
-        System.out.println("HttpTaskManager.load() fromJson (subtasks):\n" + subtasks);
-        for (Subtask subtask : subtasks) {
-            createTask(subtask);
+        System.out.println("HttpTaskManager.load() fromJson (subtasksFromServer ):\n" + subtasksFromServer);
+        if (subtasksFromServer != null) {
+            for (Subtask subtask : subtasksFromServer) {
+                int id = subtask.getId();
+                tasks.put(id, subtask);
+            }
         }
 
         json = kvTaskClient.load(KEY_EPICS);
-        List<Epic> epics;
-        epics = gson.fromJson(json, new TypeToken<ArrayList<Epic>>() {
+        List<Epic> epicsFromServer;
+        epicsFromServer = gson.fromJson(json, new TypeToken<ArrayList<Epic>>() {
         }.getType());
-        System.out.println("HttpTaskManager.load() fromJson (epics):\n" + epics);
-        for (Epic epic : epics) {
-            createTask(epic);
+        System.out.println("HttpTaskManager.load() fromJson (epicsFromServer ):\n" + epicsFromServer);
+        if (epicsFromServer != null) {
+            for (Epic epic : epicsFromServer) {
+                int id = epic.getId();
+                tasks.put(id, epic);
+            }
         }
 
         json = kvTaskClient.load(KEY_HISTORY);
@@ -67,8 +78,10 @@ public class HttpTaskManager extends FileBackedTaskManager {
         history = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {
         }.getType());
         System.out.println("HttpTaskManager.load() fromJson (history):\n" + history);
-        for (Task task : history) {
-            historyManager.add(task);
+        if (history != null) {
+            for (Task task : history) {
+                historyManager.add(task);
+            }
         }
     }
 
@@ -78,22 +91,22 @@ public class HttpTaskManager extends FileBackedTaskManager {
 
         List<Task> allTasks = getAllTasks();
         String json = gson.toJson(allTasks);
-        System.out.println("\nHTTPTaskManager.save() json (allTasks):\n" + json);
+        System.out.println("\nHttpTaskManager.save() json (allTasks):\n" + json);
         kvTaskClient.put(KEY_TASKS, json);
 
         List<Subtask> allSubtasks = getAllSubtasks();
         json = gson.toJson(allSubtasks);
-        System.out.println("\nHTTPTaskManager.save() json (allSubtasks):\n" + json);
+        System.out.println("\nHttpTaskManager.save() json (allSubtasks):\n" + json);
         kvTaskClient.put(KEY_SUBTASKS, json);
 
         List<Epic> allEpics = getAllEpics();
         json = gson.toJson(allEpics);
-        System.out.println("\nHTTPTaskManager.save() json (allEpics):\n" + json);
+        System.out.println("\nHttpTaskManager.save() json (allEpics):\n" + json);
         kvTaskClient.put(KEY_EPICS, json);
 
         List<Task> history = getHistory();
         json = gson.toJson(history);
-        System.out.println("HTTPTaskManager.save() json (history):\n" + json);
+        System.out.println("HttpTaskManager.save() json (history):\n" + json);
         kvTaskClient.put(KEY_HISTORY, json);
     }
 

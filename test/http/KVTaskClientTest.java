@@ -3,9 +3,7 @@ package http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.Task;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,6 +17,13 @@ class KVTaskClientTest {
     static void createKVClient() {
         System.out.println("*************************************************************************");
         System.out.println("Запускаем тесты класса KVTaskClientTest");
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
+    }
+
+    @BeforeEach
+    void beforeEach() {
         try {
             kvServer = new KVServer();
             kvServer.start();
@@ -26,14 +31,16 @@ class KVTaskClientTest {
             e.printStackTrace();
         }
         kvTaskClient = new KVTaskClient("http://localhost:" + KVServer.PORT);
-        gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .create();
+
+    }
+
+    @AfterEach
+    void afterEach() {
+        kvServer.stop();
     }
 
     @AfterAll
     static void stopKVServer() {
-        kvServer.stop();
     }
 
     @Test

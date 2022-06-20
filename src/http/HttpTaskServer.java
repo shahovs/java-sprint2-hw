@@ -46,6 +46,7 @@ public class HttpTaskServer {
         this.manager = manager;
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .setPrettyPrinting()
                 .create();
         try {
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -239,7 +240,6 @@ public class HttpTaskServer {
             return null;
         }
         Task task = gson.fromJson(jsonObject, Task.class);
-        System.out.println("Десереализуем из json в Task:\n" + task);
         return task;
     }
 
@@ -248,10 +248,7 @@ public class HttpTaskServer {
         if (jsonObject == null) {
             return null;
         }
-        String jsonObjectString = jsonObject.toString();
-        System.out.println("jsonObjectString: " + jsonObjectString);
-        Subtask subtask = gson.fromJson(jsonObjectString, Subtask.class);
-        System.out.println("Десереализуем из json в Subtask:\n" + subtask);
+        Subtask subtask = gson.fromJson(jsonObject, Subtask.class);
         return subtask;
     }
 
@@ -261,12 +258,11 @@ public class HttpTaskServer {
             return null;
         }
         Epic epic = gson.fromJson(jsonObject, Epic.class);
-        System.out.println("Десереализуем из json в Epic:\n" + epic);
         return epic;
     }
 
     private JsonObject getJsonObject(HttpExchange httpExchange) {
-        try (InputStream inputStream = httpExchange.getRequestBody();) {
+        try (InputStream inputStream = httpExchange.getRequestBody()) {
             String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             System.out.println("POST/PUT body:\n" + body);
             JsonElement jsonElement = JsonParser.parseString(body);
@@ -439,10 +435,9 @@ public class HttpTaskServer {
     }
 
     private void sendBodyAndClose(HttpExchange httpExchange, String responseBody) {
-        try (OutputStream os = httpExchange.getResponseBody();) {
+        try (OutputStream os = httpExchange.getResponseBody()) {
             byte[] responseBytes = responseBody.getBytes();
             os.write(responseBytes);
-            //os.write(responseBody.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -456,5 +451,5 @@ public class HttpTaskServer {
         System.out.println("HttpTaskServer остановлен");
     }
 
-} // end of class
+}
 

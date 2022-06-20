@@ -145,14 +145,9 @@ public class InMemoryTaskManager implements TaskManager {
         final int id = ++idCounter;
         subtask.setId(id);
         subtasks.put(id, subtask);
-        //Epic epic2 = subtask.getEpic();
-
         int idEpic = subtask.getEpic().getId();
-        //System.out.println("idEpic: " + idEpic);
         Epic epic = epics.get(idEpic);
-        //System.out.println("epic: " + epic);
         subtask.setEpic(epic);
-
         epic.addSubtask(subtask);
         epic.setStatusOfEpic();
         prioritizedTasks.add(subtask);

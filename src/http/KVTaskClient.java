@@ -49,6 +49,7 @@ public class KVTaskClient {
 
     // должен возвращать состояние менеджера задач через запрос GET /load/<ключ>?API_TOKEN=
     public String load(String key) {
+        System.out.println("\nKVTaskClient /load");
         URI uriLoad = URI.create(uri + "/load" + "/" + key + "?API_TOKEN=" + token);
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uriLoad).build();
         String result = "";
@@ -65,6 +66,4 @@ public class KVTaskClient {
         }
         return result;
     }
-
-
 }

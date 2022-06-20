@@ -36,20 +36,18 @@ class HttpTaskServerTest {
     static void beforeAll() {
         System.out.println("*************************************************************************");
         System.out.println("Запускаем тесты класса HttpTaskServerTest");
-        try {
-            kvServer = new KVServer();
-            kvServer.start();
-            // KVServer у нас один, так как к нему могут подключаться сколько угодно клиентов
-            // (каждый клиент получит свой токен)
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
         client = HttpClient.newHttpClient();
     }
 
     @BeforeEach
     void beforeEach() {
+        try {
+            kvServer = new KVServer();
+            kvServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         httpTaskServer = new HttpTaskServer();
         // запуск start() осуществляется автоматически вместе с созданием объекта
         // (метод start() вызывается конструктором HttpTaskServer)
@@ -58,12 +56,12 @@ class HttpTaskServerTest {
     @AfterEach
     void afterEach() {
         httpTaskServer.stop();
-    }
-
-    @AfterAll
-    static void afterAll() {
         kvServer.stop();
     }
+//
+//    @AfterAll
+//    static void afterAll() {
+//    }
 
     @Test
     void getAllTasks() {

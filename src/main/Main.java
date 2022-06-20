@@ -45,7 +45,7 @@ public class Main {
         checkManagers(manager, managerFromFile);
 
         // Дальшейшая работа второго менеджера (новые задачи)
-        Task task21 = new Task("(taskName2.1)", "(description)",0, Task.Status.NEW,
+        Task task21 = new Task("(taskName2.1)", "(description)", 0, Task.Status.NEW,
                 LocalDateTime.of(2022, 4, 4, 12, 0, 0), 10);
         Epic epic21 = new Epic("(epicName2.1)", "(description)");
         Subtask subtask21 = new Subtask("(subtaskName2.1)", "(description)", 0, Task.Status.NEW,
@@ -73,7 +73,7 @@ public class Main {
 
         TreeSet<Task> priorTasks = managerFromFile.getPrioritizedTasks();
         System.out.println("priorTask.size: " + priorTasks.size());
-        for(Task task : priorTasks) {
+        for (Task task : priorTasks) {
             System.out.println(task.getStartTime() + " " + task.getDuration() + " " + task.getName());
         }
 
@@ -90,7 +90,7 @@ public class Main {
         for (Task task : manager.getAllTasks()) {
             int id = task.getId();
             Task taskFromFile = null;
-            for(Task t : tasksFromFile) {
+            for (Task t : tasksFromFile) {
                 if (t.getId() == id) {
                     taskFromFile = t;
                     break;
@@ -136,4 +136,4 @@ public class Main {
         }
     }
 
-} // end of class
+}
