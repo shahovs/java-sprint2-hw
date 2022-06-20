@@ -14,15 +14,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 
+public class MainTest {
 // Проверяем отсюда работу всей цепочки передачи информации по http
 // (чтобы не запускать сразу все тесты всех классов)
-
-public class HttpMainTest {
-
-    @Test
-    static void mainTest() {
-        HttpMainTest.main(null);
-    }
 
     final static URI LOCAL_HOST_AND_PORT = URI.create("http://localhost:" + HttpTaskServer.PORT); // "http://localhost:8080"
     final static URI URI_HEAD_ONLY = URI.create(LOCAL_HOST_AND_PORT + HttpTaskServer.PATH_BEGIN_ONLY);
@@ -58,9 +52,10 @@ public class HttpMainTest {
         client = HttpClient.newHttpClient();
     }
 
-    public static void main(String[] args) {
+    @Test
+    void main() {
         System.out.println("\n*************************************************************************");
-        System.out.println("Запускаем тесты класса HttpMain");
+        System.out.println("Запускаем main тест");
 
         Task taskT1 = new Task("(task1)", "(noTime)");
         Task taskT2 = new Task("(task2)", "(hasTime)", 0, Task.Status.NEW,
@@ -162,7 +157,6 @@ public class HttpMainTest {
             System.out.println("Тело ответа responsePrioritized" + ":\n" + responsePrioritized.body());
 
 
-
             httpTaskServer.stop();
             httpTaskServer = new HttpTaskServer();
             // проверяем, что умеем получать готовые задачи с KVServer при начале работы
@@ -185,11 +179,6 @@ public class HttpMainTest {
         }
 
 
-
-
-
-
-
         stopServers();
     }
 
@@ -201,4 +190,5 @@ public class HttpMainTest {
         httpTaskServer.stop();
         kvServer.stop();
     }
+
 }
