@@ -23,8 +23,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         subtask = new Subtask("subtaskName", "d", 0, Task.Status.NEW, epic,
                 LocalDateTime.of(2022, 2, 2, 12, 0, 0), 15);
         manager.createTask(task);
-//        manager.createEpic(epic);
-//        manager.createSubtask(subtask);
+        manager.createEpic(epic);
+        manager.createSubtask(subtask);
     }
 
     @Test

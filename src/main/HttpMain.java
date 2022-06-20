@@ -47,7 +47,6 @@ public class HttpMain {
     static {
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .setPrettyPrinting()
                 .create();
         client = HttpClient.newHttpClient();
@@ -109,14 +108,9 @@ public class HttpMain {
                 System.out.println("HttpMain.main() statusCode != 200 StatusCode = " + responseGetAll.statusCode());
             }
             System.out.println("Тело ответа метода responseGetAll" + ":\n" + responseGetAll.body());
-
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-
-
-
         stopServers();
     }
 

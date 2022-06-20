@@ -5,50 +5,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 /**
  * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
- * {"info":
- * {"_postman_id":"21a3bc32-f829-4054-a6bf-5fc85d49933e",
- * "name":"Yjava KVServer",
- * "schema":"https://schema.getpostman.com/json/collection/v2.0.0/collection.json"},
- * "item":[
- * <p>
- * {"name":"Register","id":"fe2c2ee3-3727-4132-b03f-7485783626eb",
- * "request":{"method":"GET","header":[],"url":"http://localhost:8078/register"},
- * "response":[]},
- * <p>
- * {"name":"save","id":"87b178af-cf99-4ec5-9c6c-b1804a4318da",
- * "request":{
- * "method":"POST",
- * "header":[],
- * "body":{"mode":"raw","raw":"My value"},
- * "url":{"raw":"http://localhost:8078/save/mykey?API_KEY=DEBUG",
- * "protocol":"http",
- * "host":["localhost"],
- * "port":"8078",
- * "path":["save","mykey"],
- * "query":[{"key":"API_KEY","value":"DEBUG"}]}},
- * "response":[]},
- * <p>
- * {"name":"load","id":"cb85d0c1-f5a6-4e35-8ca1-e559acc549da",
- * "request":{
- * "method":"GET",
- * "header":[],
- * "url":{"raw":"http://localhost:8078/load/mykey?API_KEY=DEBUG",
- * "protocol":"http",
- * "host":["localhost"],
- * "port":"8078",
- * "path":["load","mykey"],
- * "query":[{"key":"API_KEY","value":"DEBUG"}]}},
- * "response":[]}]}
  */
 
 public class KVServer {
@@ -87,9 +51,6 @@ public class KVServer {
                 }
                 String value = data.get(key);
                 System.out.println("value:\n" + value);
-//                Gson gson = new Gson();
-//                String json = gson.toJson(value);
-//                System.out.println("json: " + json);
                 System.out.println("Значение для ключа " + key + " отправляется!");
                 h.sendResponseHeaders(200, 0);
                 try (OutputStream os = h.getResponseBody()) {
@@ -183,8 +144,8 @@ public class KVServer {
 
     protected void sendText(HttpExchange h, String text) throws IOException {
         byte[] resp = text.getBytes(UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json"); // TODO У меня этого нигде нет (добавить)
-        h.sendResponseHeaders(200, resp.length); // TODO и этого тоже у меня нет (length)
+        h.getResponseHeaders().add("Content-Type", "application/json");
+        h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
     }
 }

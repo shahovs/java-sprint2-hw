@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class KVTaskClientTest {
     static KVTaskClient kvTaskClient;
     static Gson gson;
@@ -37,7 +35,6 @@ class KVTaskClientTest {
     static void stopKVServer() {
         kvServer.stop();
     }
-
 
     @Test
     void putTest() {

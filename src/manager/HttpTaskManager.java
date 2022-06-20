@@ -2,11 +2,8 @@ package manager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import http.EpicAdapter;
 import http.KVTaskClient;
 import http.LocalDateTimeAdapter;
-import http.SubtaskAdapter;
-import manager.FileBackedTaskManager;
 import model.*;
 
 import java.time.LocalDateTime;
@@ -22,10 +19,6 @@ public class HttpTaskManager extends FileBackedTaskManager {
     private final KVTaskClient kvTaskClient;
     private final Gson gson;
 
-//    public HTTPTaskManager(String path) {
-//        super(path);
-//    }
-
     public HttpTaskManager(String uri) {
         super("");
         kvTaskClient = new KVTaskClient(uri);
@@ -34,7 +27,6 @@ public class HttpTaskManager extends FileBackedTaskManager {
                 //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .setPrettyPrinting()
                 .create();
-        // TODO После создания клиента менеджер запрашивает у него исходное состояние менеджера
     }
 
     // Обращается к KVTaskClient, чтобы загрузить задачи (состояние менеджера) из KVServer
@@ -54,7 +46,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
 
     // Обращается к KVTaskClient, чтобы тот сохранил состояние менеджера в KVServer
     @Override
-    protected void save() /*throws ManagerSaveException*/ {
+    protected void save() {
 
         List<Task> allTasks = getAllTasks();
         String json = gson.toJson(allTasks);
@@ -75,7 +67,6 @@ public class HttpTaskManager extends FileBackedTaskManager {
         json = gson.toJson(history);
         System.out.println("HTTPTaskManager.save() json (history):\n" + json);
         kvTaskClient.put(KEY_HISTORY, json);
-
     }
 
 }

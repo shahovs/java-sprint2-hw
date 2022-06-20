@@ -1,9 +1,5 @@
 package http;
 
-// ИТОГО ОСТАЛОСЬ ДОДЕЛАТЬ В ЭТОМ КЛАССЕ:
-// - обработка эпиков и сабтасков (по аналогии с тасками, но с особенностями - содержащимися в них элементами)
-// - все протестировать
-
 import java.net.InetSocketAddress;
 import java.net.URI;
 
@@ -30,7 +26,7 @@ import java.util.TreeSet;
 
 public class HttpTaskServer {
     public static final int PORT = 8080;
-    public final static String PATH_BEGIN_ONLY = "/tasks"; // Переделать все константы в верхнем регистре
+    public final static String PATH_BEGIN_ONLY = "/tasks";
     public final static String TASKS_TASK = "/tasks/task";
     public final static String TASKS_SUBTASK = "/tasks/subtask";
     public final static String TASKS_EPIC = "/tasks/epic";
@@ -43,14 +39,13 @@ public class HttpTaskServer {
     private HttpServer httpServer;
 
     public HttpTaskServer() {
-        this(new HttpTaskManager("http://localhost:" + KVServer.PORT)); //TODO поменять на Managers.getDefault()
+        this(new HttpTaskManager("http://localhost:" + KVServer.PORT));
     }
 
     public HttpTaskServer(TaskManager manager) {
         this.manager = manager;
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                //.registerTypeAdapter(Subtask.class, new SubtaskAdapter())
                 .create();
         try {
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -140,7 +135,6 @@ public class HttpTaskServer {
     private void taskHandle(HttpExchange httpExchange) throws IOException {
         try {
             System.out.println("\nHttpTaskServer taskHandle() RequestURI: " + httpExchange.getRequestURI());
-
             String method = httpExchange.getRequestMethod();
             boolean hasIdQuery = checkIdQuery(httpExchange);
             if (hasIdQuery) {
@@ -208,7 +202,6 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(405, 0);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -225,16 +218,16 @@ public class HttpTaskServer {
         return false;
     }
 
-    private int getId(HttpExchange httpExchange) throws IOException {
+    private int getId(HttpExchange httpExchange) {
         URI uri = httpExchange.getRequestURI();
         String queryComponent = uri.getQuery(); // "id=1" or null
         int id = -1;
         if (queryComponent != null && queryComponent.startsWith(ID_ATTRIBUTE)) {
             String idString = queryComponent.substring(ID_ATTRIBUTE.length());
             try {
-                id = Integer.parseInt(idString); //System.out.println("id=" + id);
+                id = Integer.parseInt(idString);
             } catch (NumberFormatException e) {
-                System.out.println(e);
+                System.out.println(e.getMessage());
             }
         }
         return id;
@@ -260,26 +253,6 @@ public class HttpTaskServer {
         Subtask subtask = gson.fromJson(jsonObjectString, Subtask.class);
         System.out.println("Десереализуем из json в Subtask:\n" + subtask);
         return subtask;
-
-//        String name = jsonObject.get("name").getAsString();
-//        String description = jsonObject.get("description").getAsString();
-//        String statusString = jsonObject.get("status").getAsString();
-//        Task.Status status = Task.Status.NEW;
-//        try {
-//            status = Task.Status.valueOf(statusString);
-//        } catch (IllegalArgumentException | NullPointerException e) {
-//            e.printStackTrace();
-//        }
-//        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
-//        int duration = jsonObject.get("duration").getAsInt();
-//        JsonElement epicAsJsonElement = jsonObject.get("epic");
-//        if (epicAsJsonElement.isJsonObject()) {
-//            JsonObject epic = epicAsJsonElement.getAsJsonObject();
-//            int idEpic = epic.get("id").getAsInt();
-//            return new Subtask(name, description, 0, status,
-//                    new Epic("", "", idEpic), startTime, duration);
-//        }
-//        return null;
     }
 
     private Epic getEpic(HttpExchange httpExchange) {
@@ -290,19 +263,6 @@ public class HttpTaskServer {
         Epic epic = gson.fromJson(jsonObject, Epic.class);
         System.out.println("Десереализуем из json в Epic:\n" + epic);
         return epic;
-
-//        String name = jsonObject.get("name").getAsString();
-//        String description = jsonObject.get("description").getAsString();
-//        String statusString = jsonObject.get("status").getAsString();
-//        Task.Status status = Task.Status.NEW;
-//        try {
-//            status = Task.Status.valueOf(statusString);
-//        } catch (IllegalArgumentException | NullPointerException e) {
-//            e.printStackTrace();
-//        }
-//        LocalDateTime startTime = gson.fromJson(jsonObject.get("startTime"), LocalDateTime.class);
-//        int duration = jsonObject.get("duration").getAsInt();
-//        return new Epic(name, description);
     }
 
     private JsonObject getJsonObject(HttpExchange httpExchange) {
@@ -324,7 +284,6 @@ public class HttpTaskServer {
     private void subtaskHandle(HttpExchange httpExchange) throws IOException {
         try {
             System.out.println("\nHttpTaskServer subtaskHandle() RequestURI: " + httpExchange.getRequestURI());
-
             String method = httpExchange.getRequestMethod();
             boolean hasIdQuery = checkIdQuery(httpExchange);
             if (hasIdQuery) {
@@ -394,7 +353,6 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(405, 0);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -406,7 +364,6 @@ public class HttpTaskServer {
     private void epicHandle(HttpExchange httpExchange) throws IOException {
         try {
             System.out.println("\nHttpTaskServer epicHandle() RequestURI: " + httpExchange.getRequestURI());
-
             String method = httpExchange.getRequestMethod();
             boolean hasIdQuery = checkIdQuery(httpExchange);
             if (hasIdQuery) {
@@ -474,18 +431,12 @@ public class HttpTaskServer {
                         httpExchange.sendResponseHeaders(405, 0);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             httpExchange.close();
         }
     }
-//
-//    private void send404AndClose(HttpExchange httpExchange) throws IOException {
-//        httpExchange.sendResponseHeaders(404, 0);
-//        httpExchange.close();
-//    }
 
     private void sendBodyAndClose(HttpExchange httpExchange, String responseBody) {
         try (OutputStream os = httpExchange.getResponseBody();) {
@@ -499,9 +450,6 @@ public class HttpTaskServer {
         }
     }
 
-
-    //     Метод stopServer() не работает. Как остановить сервер?
-//     (тесты умеют останавливать сервер сами, а вызовы из обычных классов - нет)
     public void stop() {
         System.out.println("Останавливаем HttpTaskServer");
         httpServer.stop(0);

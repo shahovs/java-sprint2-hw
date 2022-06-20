@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.List;
 
 class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
-    //HttpTaskManager manager;
 
     @BeforeAll
     static void createHttpTaskManager() {
@@ -23,7 +22,7 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
     @BeforeEach
     void initHttpTaskManager() {
         manager = new HttpTaskManager("http://localhost:" + KVServer.PORT);
-        initManager(); // TODO метод не работает с сабтасками и эпиками
+        initManager();
     }
 
     @Test
@@ -49,12 +48,8 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
     void createTasksTest() {
         manager.createTask(new Task("nameT", "descr.T"));
         manager.createTask(new Task("nameT2", "descr.T2"));
-
         Epic epic = new Epic("nameE", "descr.E");
         manager.createEpic(epic);
-
-        //httpTaskManager.createSubtask(new Subtask("nameS", "descr.S", epic));
-
-
     }
+
 }

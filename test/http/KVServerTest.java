@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class KVServerTest {
-    final static String localHostAndPort = "http://localhost:" + KVServer.PORT;
-    final static String uriRegister = localHostAndPort + "/register";
-    final static String uriSave = localHostAndPort + "/save";
-    final static String uriLoad = localHostAndPort + "/load";
+    final static String LOCAL_HOST_AND_PORT = "http://localhost:" + KVServer.PORT;
+    final static String URI_REGISTER = LOCAL_HOST_AND_PORT + "/register";
+    final static String URI_SAVE = LOCAL_HOST_AND_PORT + "/save";
+    final static String URI_LOAD = LOCAL_HOST_AND_PORT + "/load";
 
 
     static KVServer server;
@@ -42,7 +42,7 @@ class KVServerTest {
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
         client = HttpClient.newHttpClient();
-        token = registerTest(); // следующие тесты нужно запускать по порядку, поэтому они здесь (TODO исправить)
+        token = registerTest();
         saveTest();
         loadTest();
         reSaveTest();
@@ -60,7 +60,7 @@ class KVServerTest {
 
     static String registerTest() {
         String result = "DEBUG"; // значение по умолчанию
-        URI uri = URI.create(uriRegister);
+        URI uri = URI.create(URI_REGISTER);
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -75,7 +75,7 @@ class KVServerTest {
     }
 
     static void saveTest() {
-        URI uri = URI.create(uriSave + "/" + key + "?API_TOKEN=" + token);
+        URI uri = URI.create(URI_SAVE + "/" + key + "?API_TOKEN=" + token);
         String json = gson.toJson(new Task("taskName", "descr."));
         System.out.println("\nsaveTest() json:\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
@@ -90,7 +90,7 @@ class KVServerTest {
     }
 
     static void loadTest() {
-        URI uri = URI.create(uriLoad + "/" + key + "?API_TOKEN=" + token);
+        URI uri = URI.create(URI_LOAD + "/" + key + "?API_TOKEN=" + token);
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -102,7 +102,7 @@ class KVServerTest {
     }
 
     static void reSaveTest() {
-        URI uri = URI.create(uriSave + "/" + key + "?API_TOKEN=" + token);
+        URI uri = URI.create(URI_SAVE + "/" + key + "?API_TOKEN=" + token);
         String json = gson.toJson(new Task("newTaskName", "reSave"));
         System.out.println("\nreSaveTest() json:\n" + json);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
@@ -117,7 +117,7 @@ class KVServerTest {
     }
 
     static void secondLoadTest() {
-        URI uri = URI.create(uriLoad + "/" + key + "?API_TOKEN=" + token);
+        URI uri = URI.create(URI_LOAD + "/" + key + "?API_TOKEN=" + token);
         HttpRequest request = HttpRequest.newBuilder().GET().uri(uri).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
