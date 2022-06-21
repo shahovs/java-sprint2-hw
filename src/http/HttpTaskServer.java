@@ -52,6 +52,11 @@ public class HttpTaskServer {
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
             httpServer.createContext(PATH_BEGIN_ONLY, new tasksHandler()); // сделал такой вариант для примера
             httpServer.createContext(TASKS_PRIORITIZED, this::prioritizedHandle);
+// Привет Ульяна! Спасибо за ревью!
+// Сразу не понял ТЗ, только после твоих комментариев разобрался.
+// В итоге у меня первый контекст (PATH_BEGIN_ONLY) получился для передачи всех тасков всех видов без приоритета, чего в
+// ТЗ не требовалось. А второй контекст стал для возврата сета приоритетов. В общем функциональность расширилась ))
+// Оставлю как есть, если это возможно.
             httpServer.createContext(TASKS_HISTORY, this::historyHandle);
             httpServer.createContext(TASKS_TASK, this::taskHandle);
             httpServer.createContext(TASKS_SUBTASK, this::subtaskHandle);
@@ -78,8 +83,8 @@ public class HttpTaskServer {
                 System.out.println("\nHttpTaskServer tasksHandler.handle() RequestURI: " + httpExchange.getRequestURI());
 
                 httpExchange.sendResponseHeaders(200, 0);
-                List<Task> allTasks = manager.getAllTasks();
-                allTasks.addAll(manager.getAllSubtasks());
+                List<Task> allTasks = manager.getAllTasks(); // Оставил комментарий выше.
+                allTasks.addAll(manager.getAllSubtasks()); // А сам сет создается ниже (110-я строка)
                 allTasks.addAll(manager.getAllEpics());
                 String json = gson.toJson(allTasks);
                 sendBodyAndClose(httpExchange, json);

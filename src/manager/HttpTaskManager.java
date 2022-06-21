@@ -34,7 +34,6 @@ public class HttpTaskManager extends FileBackedTaskManager {
     // Обращается к KVTaskClient, чтобы загрузить задачи (состояние менеджера) из KVServer
     @Override
     protected void load() {
-//        tasksFromServer = gson.fromJson(json, List.class);
         System.out.println("\nHttpTaskManager /load");
 
         String json = kvTaskClient.load(KEY_TASKS);
@@ -46,6 +45,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
             for (Task task : tasksFromServer) {
                 int id = task.getId();
                 tasks.put(id, task);
+                prioritizedTasks.add(task);
             }
         }
 
@@ -58,6 +58,7 @@ public class HttpTaskManager extends FileBackedTaskManager {
             for (Subtask subtask : subtasksFromServer) {
                 int id = subtask.getId();
                 tasks.put(id, subtask);
+                prioritizedTasks.add(subtask);
             }
         }
 
