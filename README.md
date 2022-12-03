@@ -1,4 +1,5 @@
 # java-sprint2-hw
+TaskManager
 
 ЧТО ОСТАЛОСЬ СДЕЛАТЬ
 - HttpTaskManager получает исходное состояние менеджера (задачи, история) от KVTaskClient (из KVServer)
