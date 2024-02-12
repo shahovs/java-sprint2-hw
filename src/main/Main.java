@@ -16,7 +16,6 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("*************************************************************************");
         System.out.println("Запускаем тесты класса Main");
-        System.out.println("Пришло время практики!");
 
         // Создаем менеджер, но не загружаем данные из файла (имитация первого запуска программы)
         FileBackedTaskManager manager = new FileBackedTaskManager(new File("tasks.csv"));
