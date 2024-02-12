@@ -1,4 +1,3 @@
-# java-sprint2-hw
 TaskManager
 
 взаимодействие компонентов

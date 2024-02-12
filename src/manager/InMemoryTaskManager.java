@@ -155,7 +155,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean checkTimeAvailable(Task newTask) {
         LocalDateTime startTime = newTask.getStartTime();
-        LocalDateTime finishTime = newTask.getStartTime();
+        LocalDateTime finishTime = newTask.getFinishTime();
         // Если у нас задача без времени либо prioritizedTasks еще пустой, то true
         if (startTime == null || prioritizedTasks.isEmpty()) {
             return true;
@@ -246,10 +246,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (updatedSubtask == null) {
             return;
         }
-        if (!checkTimeAvailable(updatedSubtask)) {
-            System.out.println("Извините. Время для выполнения задачи уже занято. Новая задача не будет создана.");
-            return;
-        }
         final int id = updatedSubtask.getId();
         if (!subtasks.containsKey(id)) {
             return;
@@ -305,11 +301,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeSubtask(int id) {
         Subtask subtask = subtasks.get(id);
-        prioritizedTasks.remove(subtask);
-        subtasks.remove(id); // удаляем из HashMap класса manager.Manager
         if (subtask == null) {
             return;
         }
+        prioritizedTasks.remove(subtask);
+        subtasks.remove(id); // удаляем из HashMap класса manager.Manager
         Epic epic = subtask.getEpic();
         if (epic == null) {
             return;
