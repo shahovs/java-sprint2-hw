@@ -1,4 +1,4 @@
-// Тесты
+// Тесты (общая проверка программы)
 package main;
 
 import model.*;
@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.TreeSet;
 
-/**
- *
- */
 public class Main {
     public static void main(String[] args) {
         System.out.println("*************************************************************************");
@@ -27,10 +24,10 @@ public class Main {
                 epic11, LocalDateTime.of(2022, 2, 2, 12, 0, 0), 20);
         Task task12 = new Task("(taskName1.2)", "(description)");
 
-        manager.createTask(task11);
-        manager.createEpic(epic11);
-        manager.createSubtask(subtask11);
-        manager.createTask(task12);
+        manager.createTask(task11); // id = 1
+        manager.createEpic(epic11); // id = 2
+        manager.createSubtask(subtask11); // id = 3
+        manager.createTask(task12); // id = 4
 
         manager.getTask(1);
         manager.getEpic(2);
@@ -52,11 +49,10 @@ public class Main {
         Task task22 = new Task("(taskName2.2)", "(description)", 0, Task.Status.NEW,
                 LocalDateTime.of(2022, 4, 4, 12, 0, 0), 10);
 
-        managerFromFile.createTask(task21);
-        managerFromFile.createEpic(epic21);
-        managerFromFile.createSubtask(subtask21);
-        managerFromFile.createTask(task22);
-
+        managerFromFile.createTask(task21); // id = 5
+        managerFromFile.createEpic(epic21); // id = 6
+        managerFromFile.createSubtask(subtask21); // id = 7
+        managerFromFile.createTask(task22); // задача не появится, так как ее время уже занято другой задачей
         managerFromFile.getTask(4);
         managerFromFile.getEpic(6);
         managerFromFile.getSubtask(3);

@@ -208,10 +208,10 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         final int id = updatedTask.getId();
-        if (!tasks.containsKey(id)) {
+        Task task = tasks.get(id);
+        if (task == null) {
             return;
         }
-        Task task = tasks.get(id);
 
         task.setName(updatedTask.getName());
         task.setDescription(updatedTask.getDescription());
@@ -247,9 +247,6 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         final int id = updatedSubtask.getId();
-        if (!subtasks.containsKey(id)) {
-            return;
-        }
         Subtask subtask = subtasks.get(id);
         if (subtask == null) {
             return;
@@ -317,11 +314,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public String toString() {
-        String result = "TASKS:" + tasks.values();
+        StringBuilder result = new StringBuilder("TASKS:" + tasks.values());
         for (Epic epic : epics.values()) {
-            result += "\nEpic:" + epic + "\nEpic's subtasks:" + epic.getSubtasks();
+            result.append("\nEpic:").append(epic).append("\nEpic's subtasks:").append(epic.getSubtasks());
         }
-        return result;
+        return result.toString();
     }
 
 }
