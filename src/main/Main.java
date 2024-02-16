@@ -53,6 +53,7 @@ public class Main {
         managerFromFile.createEpic(epic21); // id = 6
         managerFromFile.createSubtask(subtask21); // id = 7
         managerFromFile.createTask(task22); // задача не появится, так как ее время уже занято другой задачей
+
         managerFromFile.getTask(4);
         managerFromFile.getEpic(6);
         managerFromFile.getSubtask(3);

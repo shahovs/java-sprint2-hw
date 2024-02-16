@@ -132,7 +132,8 @@ public class Task {
             return false;
         }
         Task task = (Task) obj;
-        return Objects.equals(name, task.name) && Objects.equals(description, task.description) && id == task.id && Objects.equals(status, task.status);
+        return Objects.equals(name, task.name) && Objects.equals(description, task.description)
+                && id == task.id && Objects.equals(status, task.status);
     }
 
     @Override
