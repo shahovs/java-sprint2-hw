@@ -50,13 +50,11 @@ public class HttpTaskServer {
                 .create();
         try {
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
-            httpServer.createContext(PATH_BEGIN_ONLY, new tasksHandler()); // сделал такой вариант для примера
+
+            // первый контекст (PATH_BEGIN_ONLY) для передачи всех задач всех видов без сортировки
+            // второй контекст (TASKS_PRIORITIZED) для возврата сета приоритетов (тоже всех задач, но отсортированных)
+            httpServer.createContext(PATH_BEGIN_ONLY, new tasksHandler()); // вариант с new сделан для примера
             httpServer.createContext(TASKS_PRIORITIZED, this::prioritizedHandle);
-// Привет Ульяна! Спасибо за ревью!
-// Сразу не понял ТЗ, только после твоих комментариев разобрался.
-// В итоге у меня первый контекст (PATH_BEGIN_ONLY) получился для передачи всех тасков всех видов без приоритета, чего в
-// ТЗ не требовалось. А второй контекст стал для возврата сета приоритетов. В общем функциональность расширилась ))
-// Оставлю как есть, если это возможно.
             httpServer.createContext(TASKS_HISTORY, this::historyHandle);
             httpServer.createContext(TASKS_TASK, this::taskHandle);
             httpServer.createContext(TASKS_SUBTASK, this::subtaskHandle);
@@ -68,8 +66,7 @@ public class HttpTaskServer {
         }
     }
 
-    // Сделал вариант с внутренним классом для примера
-    // path: "/tasks/"
+    // path: "/tasks/" (вариант с внутренним классом сделан для примера)
     class tasksHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
@@ -83,8 +80,8 @@ public class HttpTaskServer {
                 System.out.println("\nHttpTaskServer tasksHandler.handle() RequestURI: " + httpExchange.getRequestURI());
 
                 httpExchange.sendResponseHeaders(200, 0);
-                List<Task> allTasks = manager.getAllTasks(); // Оставил комментарий выше.
-                allTasks.addAll(manager.getAllSubtasks()); // А сам сет создается ниже (110-я строка)
+                List<Task> allTasks = manager.getAllTasks();
+                allTasks.addAll(manager.getAllSubtasks());
                 allTasks.addAll(manager.getAllEpics());
                 String json = gson.toJson(allTasks);
                 sendBodyAndClose(httpExchange, json);
@@ -190,7 +187,7 @@ public class HttpTaskServer {
                             return;
                         }
                         manager.createTask(newTask);
-                        httpExchange.sendResponseHeaders(200, 0); // подумать о кодах ответа
+                        httpExchange.sendResponseHeaders(200, 0);
                         break;
                     case "PUT":
                         Task updatedTask = getTask(httpExchange);
@@ -318,7 +315,7 @@ public class HttpTaskServer {
                     case "GET":
                         List<Subtask> allSubtasks = manager.getAllSubtasks();
                         String json = gson.toJson(allSubtasks);
-                        System.out.println("getAllSubtasks() json\n" + json); // удалить после окончания разработки
+                        System.out.println("getAllSubtasks() json\n" + json);
                         httpExchange.sendResponseHeaders(200, 0);
                         sendBodyAndClose(httpExchange, json);
                         break;
