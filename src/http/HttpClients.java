@@ -65,27 +65,5 @@ public class HttpClients {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-        /*HttpRequest request1 = HttpRequest.newBuilder()
-                .POST(body)
-                .uri(uri)
-                .build();
-
-        HttpRequest request2 = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .build();
-        try {
-            System.out.println("Before response HttpTaskServer");
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("After response HttpTaskServer");
-            if (response.statusCode() == 200) {
-                System.out.println("Код ответа 200");
-            } else {
-                System.out.println("Код ответа: " + response.statusCode());
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }*/
     }
 }

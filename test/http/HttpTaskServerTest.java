@@ -58,10 +58,6 @@ class HttpTaskServerTest {
         httpTaskServer.stop();
         kvServer.stop();
     }
-//
-//    @AfterAll
-//    static void afterAll() {
-//    }
 
     @Test
     void getAllTasks() {
