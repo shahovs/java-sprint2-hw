@@ -171,7 +171,7 @@ public class HttpTaskServer {
                     case "GET":
                         List<Task> allTasks = manager.getAllTasks();
                         String json = gson.toJson(allTasks);
-                        System.out.println("getAllTasks() json\n" + json); // удалить после окончания разработки
+                        System.out.println("getAllTasks() json\n" + json);
                         httpExchange.sendResponseHeaders(200, 0);
                         sendBodyAndClose(httpExchange, json);
                         break;
@@ -333,7 +333,7 @@ public class HttpTaskServer {
                         System.out.println("HttpTaskServer POST Subtask (newSubtask):" + newSubtask);
                         System.out.println("HttpTaskServer POST Subtask (newSubtask' epic):" + newSubtask.getEpic());
                         manager.createSubtask(newSubtask);
-                        httpExchange.sendResponseHeaders(200, 0); // подумать о кодах ответа
+                        httpExchange.sendResponseHeaders(200, 0);
                         break;
                     case "PUT":
                         Subtask updatedSubtask = getSubtask(httpExchange);
@@ -395,7 +395,7 @@ public class HttpTaskServer {
                     case "GET":
                         List<Epic> allEpics = manager.getAllEpics();
                         String json = gson.toJson(allEpics);
-                        System.out.println("getAllEpics() json\n" + json); // удалить после окончания разработки
+                        System.out.println("getAllEpics() json\n" + json);
                         httpExchange.sendResponseHeaders(200, 0);
                         sendBodyAndClose(httpExchange, json);
                         break;
